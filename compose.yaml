@@ -1,0 +1,58 @@
+services:
+  wordpress:
+    image: wordpress:6.8.2-php8.1-apache
+    container_name: site
+    restart: unless-stopped
+    ports:
+      - "5011:80"
+    environment:
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_USER: gabrielsv
+      WORDPRESS_DB_PASSWORD: 'Gabriel2024Strong'
+      WORDPRESS_DB_NAME: db_blog_gabrielsv
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+    networks:
+      - blog-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    ports:
+      - "5013:3306"
+    environment:
+      MYSQL_DATABASE: db_blog_gabrielsv
+      MYSQL_USER: gabrielsv
+      MYSQL_PASSWORD: 'Gabriel2024Strong'
+      MYSQL_ROOT_PASSWORD: 'Root2024Strong'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - blog-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: pma
+    restart: unless-stopped
+    ports:
+      - "5012:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: 'Root2024Strong'
+      MYSQL_ROOT_PASSWORD: 'Root2024Strong'
+    depends_on:
+      - mysql
+    networks:
+      - blog-network
+
+volumes:
+  mysql_data:
+
+networks:
+  blog-network:
+    driver: bridge

@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "ESNext",
+    "lib": ["ES6", "DOM", "DOM.Iterable"],
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": false,
+    "outDir": "./wp-content/themes/gabrielsv.com/resources/dist",
+    "baseUrl": "./wp-content/themes/gabrielsv.com/resources/typescript",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "wp-content/themes/gabrielsv.com/resources/typescript/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "wp-content/themes/gabrielsv.com/resources/dist"
+  ]
+}
