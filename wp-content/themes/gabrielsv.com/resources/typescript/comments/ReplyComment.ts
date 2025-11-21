@@ -1,3 +1,5 @@
+import { openModal, closeModal } from '../bulma/Modals';
+
 export class ReplyComment {
   private replyModal: HTMLElement;
   private originalFormParent: HTMLElement | null;
@@ -19,8 +21,18 @@ export class ReplyComment {
     // Interceptar cliques nos botões de resposta
     document.addEventListener('click', this.handleReplyClick.bind(this));
 
-    // Retornar formulário ao fechar modal
-    this.replyModal.addEventListener('hidden.bs.modal', this.handleModalHidden.bind(this));
+    // Retornar formulário ao fechar modal (Bulma - observar quando perde classe is-active)
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const target = mutation.target as HTMLElement;
+          if (!target.classList.contains('is-active')) {
+            this.handleModalHidden();
+          }
+        }
+      });
+    });
+    observer.observe(this.replyModal, { attributes: true });
   }
 
   private handleReplyClick(e: Event): void {
@@ -50,9 +62,8 @@ export class ReplyComment {
     // Atualizar conteúdo do modal
     this.updateModalContent(commentAuthor, commentAvatar, commentDate, commentContent, replyToId);
 
-    // Abrir modal
-    const modal = new bootstrap.Modal(this.replyModal);
-    modal.show();
+    // Abrir modal (Bulma)
+    openModal(this.replyModal);
   }
 
   private updateModalContent(
@@ -101,13 +112,12 @@ export class ReplyComment {
       const title = respondDiv.querySelector<HTMLElement>('#reply-title');
       if (title) title.style.display = 'none';
 
-      // Botão cancelar fecha o modal
+      // Botão cancelar fecha o modal (Bulma)
       const cancelBtn = respondDiv.querySelector<HTMLAnchorElement>('#cancel-comment-reply-link');
       if (cancelBtn) {
         cancelBtn.onclick = (e) => {
           e.preventDefault();
-          const modal = bootstrap.Modal.getInstance(this.replyModal);
-          modal?.hide();
+          closeModal(this.replyModal);
           return false;
         };
       }

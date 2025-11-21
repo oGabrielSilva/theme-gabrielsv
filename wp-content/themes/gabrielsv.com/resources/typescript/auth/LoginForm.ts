@@ -1,5 +1,5 @@
 import type { WordPressAjaxResponse } from '../types/wordpress';
-import { showGlobalToast } from '../utils/globalToast';
+import { showSuccess, showError } from '../utils/notifications';
 
 interface LoginResponse {
   message: string;
@@ -42,12 +42,14 @@ export class LoginForm {
 
     // Validação HTML5
     if (!this.form.checkValidity()) {
-      this.form.classList.add('was-validated');
+      this.form.reportValidity();
       return;
     }
 
-    // Desabilitar botão e mostrar loading
+    // Desabilitar botão e mostrar loading (Bulma)
     this.submitBtn.disabled = true;
+    this.submitBtn.classList.add('is-loading');
+    const originalText = this.submitBtn.textContent;
     this.submitBtn.textContent = 'Entrando...';
 
     try {
@@ -74,18 +76,19 @@ export class LoginForm {
       const data: WordPressAjaxResponse<LoginResponse> = await response.json();
 
       if (data.success) {
-        showGlobalToast('Login realizado com sucesso!', 'success');
+        showSuccess('Login realizado com sucesso!');
         setTimeout(() => {
           window.location.href = data.data.redirect || '/';
         }, 500);
       } else {
-        showGlobalToast(data.data.message || 'Erro ao fazer login. Tente novamente.', 'danger');
+        showError(data.data.message || 'Erro ao fazer login. Tente novamente.');
       }
     } catch (error) {
-      showGlobalToast('Erro de conexão. Tente novamente.', 'danger');
+      showError('Erro de conexão. Tente novamente.');
     } finally {
       this.submitBtn.disabled = false;
-      this.submitBtn.textContent = 'Entrar';
+      this.submitBtn.classList.remove('is-loading');
+      this.submitBtn.textContent = originalText || 'Entrar';
     }
   }
 }

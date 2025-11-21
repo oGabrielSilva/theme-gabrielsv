@@ -1,5 +1,5 @@
 import type { WordPressAjaxResponse } from '../types/wordpress';
-import { showGlobalToast } from '../utils/globalToast';
+import { showSuccess, showError } from '../utils/notifications';
 
 interface RegisterResponse {
   message: string;
@@ -46,8 +46,18 @@ export class RegisterForm {
     // Submit
     this.form.addEventListener('submit', this.handleSubmit.bind(this));
 
-    // Limpar ao fechar modal
-    this.modal.addEventListener('hidden.bs.modal', this.resetForm.bind(this));
+    // Limpar ao fechar modal (Bulma - observar quando perde classe is-active)
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const target = mutation.target as HTMLElement;
+          if (!target.classList.contains('is-active')) {
+            this.resetForm();
+          }
+        }
+      });
+    });
+    observer.observe(this.modal, { attributes: true });
   }
 
   private formatUsername(e: Event): void {
@@ -65,7 +75,7 @@ export class RegisterForm {
     // Validar senhas
     if (this.passwordInput.value !== this.passwordConfirmInput.value) {
       this.passwordConfirmInput.setCustomValidity('As senhas não coincidem.');
-      this.form.classList.add('was-validated');
+      this.form.reportValidity();
       return;
     } else {
       this.passwordConfirmInput.setCustomValidity('');
@@ -73,12 +83,14 @@ export class RegisterForm {
 
     // Validação HTML5
     if (!this.form.checkValidity()) {
-      this.form.classList.add('was-validated');
+      this.form.reportValidity();
       return;
     }
 
-    // Desabilitar botão e mostrar loading
+    // Desabilitar botão e mostrar loading (Bulma)
     this.submitBtn.disabled = true;
+    this.submitBtn.classList.add('is-loading');
+    const originalText = this.submitBtn.textContent;
     this.submitBtn.textContent = 'Criando conta...';
 
     try {
@@ -98,25 +110,26 @@ export class RegisterForm {
       const data: WordPressAjaxResponse<RegisterResponse> = await response.json();
 
       if (data.success) {
-        showGlobalToast(data.data.message || 'Conta criada com sucesso! Redirecionando...', 'success');
+        showSuccess(data.data.message || 'Conta criada com sucesso! Redirecionando...');
         setTimeout(() => {
           window.location.href = data.data.redirect || '/';
         }, 2000);
       } else {
-        showGlobalToast(data.data.message || 'Erro ao criar conta. Tente novamente.', 'danger');
+        showError(data.data.message || 'Erro ao criar conta. Tente novamente.');
       }
     } catch (error) {
-      showGlobalToast('Erro de conexão. Tente novamente.', 'danger');
+      showError('Erro de conexão. Tente novamente.');
     } finally {
       this.submitBtn.disabled = false;
-      this.submitBtn.textContent = 'Criar conta';
+      this.submitBtn.classList.remove('is-loading');
+      this.submitBtn.textContent = originalText || 'Criar conta';
     }
   }
 
   private resetForm(): void {
     this.form.reset();
-    this.form.classList.remove('was-validated');
     this.submitBtn.disabled = false;
+    this.submitBtn.classList.remove('is-loading');
     this.submitBtn.textContent = 'Criar conta';
   }
 }

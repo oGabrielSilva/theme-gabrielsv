@@ -1,3 +1,5 @@
+import { openModal } from '../bulma/Modals';
+
 export function initSearchModal(): void {
   const navbarSearchInput = document.getElementById('navbar-search-input') as HTMLInputElement | null;
   const searchModal = document.getElementById('searchModal');
@@ -7,14 +9,14 @@ export function initSearchModal(): void {
     return;
   }
 
-  const modalInstance = new bootstrap.Modal(searchModal);
-
   navbarSearchInput.addEventListener('focus', function () {
-    modalInstance.show();
-  });
+    // Abrir modal (Bulma)
+    openModal(searchModal);
 
-  searchModal.addEventListener('shown.bs.modal', function () {
+    // Focar no input do modal após abrir
     navbarSearchInput.blur();
-    modalSearchInput.focus();
+    setTimeout(() => {
+      modalSearchInput.focus();
+    }, 100);
   });
 }

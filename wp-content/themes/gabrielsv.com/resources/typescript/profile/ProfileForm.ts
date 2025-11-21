@@ -1,5 +1,5 @@
 import type { WordPressAjaxResponse } from '../types/wordpress';
-import { showGlobalToast } from '../utils/globalToast';
+import { showSuccess, showError } from '../utils/notifications';
 
 interface ProfileResponse {
   message: string;
@@ -36,14 +36,11 @@ export class ProfileForm {
   private async handleSubmit(e: Event): Promise<void> {
     e.preventDefault();
 
-    // Limpar validações anteriores
-    this.form.classList.remove('was-validated');
-
     // Validar senhas se preenchidas
     if (this.passwordField.value || this.passwordConfirmField.value) {
       if (this.passwordField.value !== this.passwordConfirmField.value) {
         this.passwordConfirmField.setCustomValidity('As senhas não coincidem.');
-        this.form.classList.add('was-validated');
+        this.form.reportValidity();
         return;
       } else {
         this.passwordConfirmField.setCustomValidity('');
@@ -52,7 +49,7 @@ export class ProfileForm {
 
     // Validação HTML5
     if (!this.form.checkValidity()) {
-      this.form.classList.add('was-validated');
+      this.form.reportValidity();
       return;
     }
 
@@ -73,8 +70,10 @@ export class ProfileForm {
       formData.append('password', this.passwordField.value);
     }
 
-    // Desabilitar botão e mostrar loading
+    // Desabilitar botão e mostrar loading (Bulma)
     this.submitBtn.disabled = true;
+    this.submitBtn.classList.add('is-loading');
+    const originalText = this.submitBtn.textContent;
     this.submitBtn.textContent = 'Salvando...';
 
     try {
@@ -87,20 +86,21 @@ export class ProfileForm {
       const data: WordPressAjaxResponse<ProfileResponse> = await response.json();
 
       if (data.success) {
-        showGlobalToast(data.data.message || 'Perfil atualizado com sucesso!', 'success');
+        showSuccess(data.data.message || 'Perfil atualizado com sucesso!');
         this.passwordField.value = '';
         this.passwordConfirmField.value = '';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        showGlobalToast(data.data.message || 'Erro ao atualizar perfil. Tente novamente.', 'danger');
+        showError(data.data.message || 'Erro ao atualizar perfil. Tente novamente.');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error) {
-      showGlobalToast('Erro de conexão. Tente novamente.', 'danger');
+      showError('Erro de conexão. Tente novamente.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       this.submitBtn.disabled = false;
-      this.submitBtn.textContent = 'Salvar alterações';
+      this.submitBtn.classList.remove('is-loading');
+      this.submitBtn.textContent = originalText || 'Salvar alterações';
     }
   }
 }

@@ -1,5 +1,6 @@
 import type { WordPressAjaxResponse } from '../types/wordpress';
-import { showToast } from '../utils/toast';
+import { showSuccess, showError } from '../utils/notifications';
+import { openModal, closeModal } from '../bulma/Modals';
 
 interface DeleteCommentResponse {
   message: string;
@@ -14,7 +15,7 @@ export class DeleteComment {
   constructor() {
     const deleteModal = document.getElementById('deleteCommentModal');
     const confirmBtn = document.getElementById('confirmDeleteCommentBtn') as HTMLButtonElement | null;
-    const cancelBtn = document.querySelector<HTMLElement>('#deleteCommentModal [data-bs-dismiss="modal"]');
+    const cancelBtn = document.querySelector<HTMLElement>('#deleteCommentModal .delete, #deleteCommentModal [data-modal-close]');
 
     if (!deleteModal || !confirmBtn || !cancelBtn) {
       throw new Error('Delete comment elements not found');
@@ -34,8 +35,18 @@ export class DeleteComment {
     // Confirmar deleção
     this.confirmBtn.addEventListener('click', this.handleConfirmDelete.bind(this));
 
-    // Limpar ao fechar modal
-    this.deleteModal.addEventListener('hidden.bs.modal', this.resetModal.bind(this));
+    // Limpar ao fechar modal (Bulma - observar quando perde classe is-active)
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const target = mutation.target as HTMLElement;
+          if (!target.classList.contains('is-active')) {
+            this.resetModal();
+          }
+        }
+      });
+    });
+    observer.observe(this.deleteModal, { attributes: true });
   }
 
   private handleDeleteClick(e: Event): void {
@@ -46,15 +57,17 @@ export class DeleteComment {
 
     this.commentToDelete = deleteBtn.getAttribute('data-comment-id');
 
-    const modal = new bootstrap.Modal(this.deleteModal);
-    modal.show();
+    // Abrir modal (Bulma)
+    openModal(this.deleteModal);
   }
 
   private async handleConfirmDelete(): Promise<void> {
     if (!this.commentToDelete) return;
 
-    // Desabilitar botões
+    // Desabilitar botões (Bulma)
     this.confirmBtn.disabled = true;
+    this.confirmBtn.classList.add('is-loading');
+    const originalText = this.confirmBtn.textContent;
     this.confirmBtn.textContent = 'Deletando...';
     this.cancelBtn.setAttribute('disabled', 'true');
 
@@ -79,9 +92,8 @@ export class DeleteComment {
       const data: WordPressAjaxResponse<DeleteCommentResponse> = await response.json();
 
       if (data.success) {
-        // Fechar modal
-        const modalInstance = bootstrap.Modal.getInstance(this.deleteModal);
-        modalInstance?.hide();
+        // Fechar modal (Bulma)
+        closeModal(this.deleteModal);
 
         // Remover comentário do DOM com animação
         const commentElement = document.getElementById('comment-' + this.commentToDelete);
@@ -90,19 +102,20 @@ export class DeleteComment {
           commentElement.style.opacity = '0';
           setTimeout(() => {
             commentElement.remove();
-            showToast('Comentário deletado com sucesso', 'success');
+            showSuccess('Comentário deletado com sucesso');
           }, 300);
         }
 
         this.commentToDelete = null;
       } else {
-        showToast(data.data.message || 'Erro ao deletar comentário', 'danger');
+        showError(data.data.message || 'Erro ao deletar comentário');
       }
     } catch (error) {
-      showToast('Erro de conexão. Tente novamente.', 'danger');
+      showError('Erro de conexão. Tente novamente.');
     } finally {
       this.confirmBtn.disabled = false;
-      this.confirmBtn.textContent = 'Deletar';
+      this.confirmBtn.classList.remove('is-loading');
+      this.confirmBtn.textContent = originalText || 'Deletar';
       this.cancelBtn.removeAttribute('disabled');
     }
   }
@@ -110,6 +123,7 @@ export class DeleteComment {
   private resetModal(): void {
     this.commentToDelete = null;
     this.confirmBtn.disabled = false;
+    this.confirmBtn.classList.remove('is-loading');
     this.confirmBtn.textContent = 'Deletar';
     this.cancelBtn.removeAttribute('disabled');
   }

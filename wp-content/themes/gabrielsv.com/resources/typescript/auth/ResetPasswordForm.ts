@@ -1,5 +1,5 @@
 import type { WordPressAjaxResponse } from "../types/wordpress";
-import { showGlobalToast } from "../utils/globalToast";
+import { showSuccess, showError } from "../utils/notifications";
 
 interface ResetPasswordResponse {
   message: string;
@@ -47,7 +47,7 @@ export class ResetPasswordForm {
     // Validar senhas
     if (this.passwordInput.value !== this.passwordConfirmInput.value) {
       this.passwordConfirmInput.setCustomValidity("As senhas não coincidem.");
-      this.form.classList.add("was-validated");
+      this.form.reportValidity();
       return;
     } else {
       this.passwordConfirmInput.setCustomValidity("");
@@ -55,12 +55,14 @@ export class ResetPasswordForm {
 
     // Validação HTML5
     if (!this.form.checkValidity()) {
-      this.form.classList.add("was-validated");
+      this.form.reportValidity();
       return;
     }
 
-    // Desabilitar botão e mostrar loading
+    // Desabilitar botão e mostrar loading (Bulma)
     this.submitBtn.disabled = true;
+    this.submitBtn.classList.add("is-loading");
+    const originalText = this.submitBtn.textContent;
     this.submitBtn.textContent = "Redefinindo...";
 
     try {
@@ -78,24 +80,19 @@ export class ResetPasswordForm {
         await response.json();
 
       if (data.success) {
-        showGlobalToast(
-          data.data.message || "Senha redefinida com sucesso!",
-          "success"
-        );
+        showSuccess(data.data.message || "Senha redefinida com sucesso!");
         setTimeout(() => {
           window.location.href = "/auth";
         }, 1000);
       } else {
-        showGlobalToast(
-          data.data.message || "Erro ao redefinir senha. Tente novamente.",
-          "danger"
-        );
+        showError(data.data.message || "Erro ao redefinir senha. Tente novamente.");
       }
     } catch (error) {
-      showGlobalToast("Erro de conexão. Tente novamente.", "danger");
+      showError("Erro de conexão. Tente novamente.");
     } finally {
       this.submitBtn.disabled = false;
-      this.submitBtn.textContent = "Redefinir senha";
+      this.submitBtn.classList.remove("is-loading");
+      this.submitBtn.textContent = originalText || "Redefinir senha";
     }
   }
 }
