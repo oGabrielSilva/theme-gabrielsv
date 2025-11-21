@@ -1,3 +1,10 @@
+/* Importar Bulma CSS local */
+@import '../lib/bulma/1_0_4/css/bulma.min.css';
+
+/* ============================================
+   ESTILOS CUSTOMIZADOS DO TEMA
+   ============================================ */
+
 *,
 .inter {
   font-family: 'Inter', sans-serif;
@@ -43,13 +50,47 @@ nav.navbar a span.kb {
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
 }
 
-/* Link com cor do corpo que muda para ênfase no hover */
+/* Link com cor do corpo que muda para ênfase no hover (variáveis Bulma) */
 .linkb {
-  color: var(--bs-secondary-color) !important;
+  color: var(--bulma-text-weak) !important;
   transition: color 0.2s ease;
   text-decoration: none;
 }
 
 .linkb:hover {
-  color: var(--bs-emphasis-color) !important;
+  color: var(--bulma-text-strong) !important;
+}
+
+/* ============================================
+   NOTIFICATION CONTAINER (Substituir toasts Bootstrap)
+   ============================================ */
+
+.notification-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  padding: 1rem;
+  z-index: 9999;
+  max-width: 400px;
+}
+
+.notification-container .notification {
+  margin-bottom: 0.5rem;
+  animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }

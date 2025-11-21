@@ -21,7 +21,7 @@ add_action('after_setup_theme', 'theme_setup');
  * Carrega o conteúdo de um template de e-mail em HTML para uma string.
  *
  * @param string $template_name O nome do arquivo de template (sem .php) em /template-parts/emails/.
- * @param array  $args Argumentos para extrair e usar no template.
+ * @param array  $args Argumentos para usar no template.
  * @return string O conteúdo do e-mail em HTML.
  */
 function get_email_template_html($template_name, $args = array())
@@ -30,8 +30,7 @@ function get_email_template_html($template_name, $args = array())
     $template_path = get_theme_file_path("/template-parts/emails/{$template_name}.php");
 
     if (file_exists($template_path)) {
-        // Extrai as variáveis para serem usadas no template
-        extract($args);
+        // Passa $args diretamente para o template sem usar extract()
         include $template_path;
     }
 
@@ -137,6 +136,45 @@ function theme_redirect_author_for_subscribers()
 add_action('template_redirect', 'theme_redirect_author_for_subscribers');
 
 // ============================================
+// HELPER: OBTER IP DO CLIENTE
+// ============================================
+
+/**
+ * Obtém o IP real do cliente, considerando proxies confiáveis.
+ *
+ * @return string IP do cliente
+ */
+function theme_get_client_ip()
+{
+    $ip_keys = array(
+        'HTTP_CF_CONNECTING_IP', // Cloudflare
+        'HTTP_X_FORWARDED_FOR',   // Proxy genérico
+        'HTTP_X_REAL_IP',         // Nginx proxy
+        'REMOTE_ADDR'             // Fallback
+    );
+
+    foreach ($ip_keys as $key) {
+        if (!empty($_SERVER[$key])) {
+            $ip = $_SERVER[$key];
+
+            // Se for X-Forwarded-For, pode conter múltiplos IPs (pega o primeiro)
+            if ($key === 'HTTP_X_FORWARDED_FOR' && strpos($ip, ',') !== false) {
+                $ip_list = explode(',', $ip);
+                $ip = trim($ip_list[0]);
+            }
+
+            // Validar se é IP válido
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                return $ip;
+            }
+        }
+    }
+
+    // Fallback: retornar REMOTE_ADDR mesmo que seja privado
+    return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+}
+
+// ============================================
 // AJAX ENDPOINTS - AUTENTICAÇÃO
 // ============================================
 
@@ -220,10 +258,10 @@ function theme_ajax_custom_register()
         ));
     }
 
-    // Verificar se email já existe
+    // Verificar se email já existe (mensagem genérica para prevenir user enumeration)
     if (email_exists($email)) {
         wp_send_json_error(array(
-            'message' => 'Este e-mail já está cadastrado.',
+            'message' => 'Não foi possível criar sua conta. Tente outro e-mail ou faça login.',
         ));
     }
 
@@ -323,7 +361,7 @@ function theme_ajax_password_reset_request()
     }
 
     // Rate limiting: máximo 3 tentativas por IP a cada 15 minutos
-    $ip_address = $_SERVER['REMOTE_ADDR'];
+    $ip_address = theme_get_client_ip();
     $transient_key = 'password_reset_' . md5($ip_address);
     $attempts = get_transient($transient_key);
 
@@ -341,62 +379,55 @@ function theme_ajax_password_reset_request()
         ));
     }
 
-    // Verificar se usuário existe
-    $user = get_user_by('email', $email);
-    if (!$user) {
-        wp_send_json_error(array(
-            'message' => 'Nenhuma conta encontrada com este e-mail.',
-        ));
-    }
-
-    // Incrementar contador de tentativas
+    // Incrementar contador de tentativas (antes de verificar usuário)
     $new_attempts = $attempts ? $attempts + 1 : 1;
     set_transient($transient_key, $new_attempts, 15 * MINUTE_IN_SECONDS);
 
-    // Gerar token de reset
-    $reset_key = get_password_reset_key($user);
-    if (is_wp_error($reset_key)) {
-        wp_send_json_error(array(
-            'message' => 'Erro ao gerar link de recuperação. Tente novamente.',
-        ));
+    // Verificar se usuário existe
+    $user = get_user_by('email', $email);
+
+    // SEMPRE retornar sucesso (previne user enumeration)
+    // Mas só envia email se usuário existir
+    if ($user) {
+        // Gerar token de reset
+        $reset_key = get_password_reset_key($user);
+
+        if (!is_wp_error($reset_key)) {
+            // Criar link de reset
+            $reset_url = add_query_arg(
+                array(
+                    'action' => 'rp',
+                    'key' => $reset_key,
+                    'login' => rawurlencode($user->user_login),
+                ),
+                home_url('/auth')
+            );
+
+            // Enviar email
+            $to = $user->user_email;
+            $subject = '[' . get_bloginfo('name') . '] Recuperação de senha';
+            $message = get_email_template_html('email-password-reset', [
+                'user_name' => $user->display_name,
+                'reset_url' => $reset_url,
+            ]);
+
+            $headers = array('Content-Type: text/html; charset=UTF-8');
+            wp_mail($to, $subject, $message, $headers);
+        }
     }
 
-    // Criar link de reset
-    $reset_url = add_query_arg(
-        array(
-            'action' => 'rp',
-            'key' => $reset_key,
-            'login' => rawurlencode($user->user_login),
-        ),
-        home_url('/auth')
-    );
-
-    // Enviar email
-    $to = $user->user_email;
-    $subject = '[' . get_bloginfo('name') . '] Recuperação de senha';
-    $message = get_email_template_html('email-password-reset', [
-        'user_name' => $user->display_name,
-        'reset_url' => $reset_url,
-    ]);
-
-    $headers = array('Content-Type: text/html; charset=UTF-8');
-
-    $sent = wp_mail($to, $subject, $message, $headers);
-
-    if (!$sent) {
-        wp_send_json_error(array(
-            'message' => 'Erro ao enviar e-mail. Tente novamente mais tarde.',
-        ));
-    }
-
+    // Sempre retornar sucesso (mesmo se usuário não existir)
     wp_send_json_success(array(
-        'message' => 'Link de recuperação enviado! Verifique seu e-mail.',
+        'message' => 'Se o e-mail estiver cadastrado, você receberá um link de recuperação.',
     ));
 }
 add_action('wp_ajax_nopriv_password_reset_request', 'theme_ajax_password_reset_request');
 
 function theme_ajax_password_reset_confirm()
 {
+    // Verificar nonce (CSRF protection)
+    check_ajax_referer('auth_nonce', 'nonce');
+
     // Validar dados
     $reset_key = sanitize_text_field($_POST['reset_key']);
     $reset_login = sanitize_text_field($_POST['reset_login']);
@@ -423,8 +454,16 @@ function theme_ajax_password_reset_confirm()
         }
     }
 
-    // Redefinir senha
+    // Redefinir senha (já invalida o token automaticamente)
     reset_password($user, $password);
+
+    // Garantir invalidação do token (segurança extra)
+    global $wpdb;
+    $wpdb->update(
+        $wpdb->users,
+        array('user_activation_key' => ''),
+        array('ID' => $user->ID)
+    );
 
     wp_send_json_success(array(
         'message' => 'Senha redefinida com sucesso! Redirecionando...',
@@ -472,7 +511,7 @@ function theme_ajax_delete_comment()
 
     // Verificar se o usuário é o autor do comentário
     $current_user_id = get_current_user_id();
-    if ($comment->user_id != $current_user_id) {
+    if ($comment->user_id !== $current_user_id) {
         wp_send_json_error(array(
             'message' => 'Você não pode deletar este comentário.',
         ));
@@ -495,9 +534,8 @@ add_action('wp_ajax_delete_user_comment', 'theme_ajax_delete_comment');
 
 function theme_styles()
 {
-    wp_enqueue_style('bootstrap', get_template_directory_uri() . '/resources/lib/bootstrap/5_3_8/css/bootstrap.min.css', array(), '5.3.8');
-
-    wp_enqueue_style('master', get_template_directory_uri() . '/resources/dist/css/master.min.css', array('bootstrap'), '1.0.0');
+    // CSS compilado pelo Webpack (já incluirá Bulma)
+    wp_enqueue_style('master', get_template_directory_uri() . '/resources/dist/css/master.min.css', array(), '1.0.0');
 
     wp_enqueue_style('style', get_stylesheet_uri(), array(), '1.0.0');
 }
@@ -505,17 +543,14 @@ add_action('wp_enqueue_scripts', 'theme_styles');
 
 function theme_scripts()
 {
-    wp_enqueue_script('bootstrap', get_template_directory_uri() . '/resources/lib/bootstrap/5_3_8/js/bootstrap.bundle.min.js', array(), '5.3.8', [
-        'in_footer' => true,
-    ]);
-
-    wp_enqueue_script('main', get_template_directory_uri() . '/resources/dist/javascript/main.min.js', array('bootstrap'), '1.0.0', [
+    // JavaScript compilado pelo Webpack (já incluirá componentes Bulma em TypeScript)
+    wp_enqueue_script('main', get_template_directory_uri() . '/resources/dist/javascript/main.min.js', array(), '1.0.0', [
         'in_footer' => false,
     ]);
 
     // Script de comentários apenas em posts com comentários
     if (is_singular() && comments_open()) {
-        wp_enqueue_script('comments', get_template_directory_uri() . '/resources/dist/javascript/comments.min.js', array('bootstrap'), '1.0.0', [
+        wp_enqueue_script('comments', get_template_directory_uri() . '/resources/dist/javascript/comments.min.js', array(), '1.0.0', [
             'in_footer' => true,
         ]);
         wp_localize_script('comments', 'commentsData', array(
@@ -594,6 +629,44 @@ add_filter('get_avatar_data', function ($args, $id_or_email) {
     return $args;
 }, 10, 2);
 
+// Limpar cache de queries quando posts forem publicados/atualizados
+function theme_clear_post_caches($post_id)
+{
+    // Limpar cache de posts relacionados
+    delete_transient('related_posts_' . $post_id);
+
+    // Limpar cache de últimos posts para todos os posts
+    global $wpdb;
+    $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_latest_posts_%'");
+    $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_latest_posts_%'");
+
+    // Limpar cache de posts do autor
+    $author_id = get_post_field('post_author', $post_id);
+    $wpdb->query($wpdb->prepare(
+        "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+        '_transient_author_posts_%_' . $author_id
+    ));
+    $wpdb->query($wpdb->prepare(
+        "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+        '_transient_timeout_author_posts_%_' . $author_id
+    ));
+}
+add_action('save_post', 'theme_clear_post_caches');
+add_action('delete_post', 'theme_clear_post_caches');
+
+// Helper para queries com cache
+function theme_get_cached_query($cache_key, $query_args, $cache_duration = 12 * HOUR_IN_SECONDS)
+{
+    $cached_query = get_transient($cache_key);
+
+    if (false === $cached_query) {
+        $cached_query = new WP_Query($query_args);
+        set_transient($cache_key, $cached_query, $cache_duration);
+    }
+
+    return $cached_query;
+}
+
 function theme_add_google_fonts()
 {
     echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
@@ -635,6 +708,13 @@ function theme_add_image_sizes()
 add_action('after_setup_theme', 'theme_add_image_sizes');
 
 
+// Helper para nome de categoria (converte "Uncategorized" para "Rabiscos")
+function theme_get_category_name($category)
+{
+    $default_category_id = get_option('default_category');
+    return ($category->term_id === $default_category_id) ? 'Rabiscos' : $category->name;
+}
+
 // Função helper para obter categorias formatadas
 function theme_get_formatted_categories($post_id = null)
 {
@@ -646,12 +726,9 @@ function theme_get_formatted_categories($post_id = null)
     $formatted_categories = array();
 
     if (!empty($categories)) {
-        $default_category_id = get_option('default_category');
-
         foreach ($categories as $category) {
-            $category_name = ($category->term_id == $default_category_id) ? 'Rabiscos' : $category->name;
             $formatted_categories[] = array(
-                'name' => $category_name,
+                'name' => theme_get_category_name($category),
                 'link' => get_category_link($category->term_id),
                 'slug' => $category->slug
             );
@@ -751,6 +828,7 @@ function theme_comments_setup()
 
     // Modificar query SQL para incluir comentários não aprovados quando necessário
     add_filter('comments_clauses', function ($clauses, $query) {
+        global $wpdb;
         $current_user_id = get_current_user_id();
 
         // Se não está logado, manter comportamento padrão (só aprovados)
@@ -770,9 +848,10 @@ function theme_comments_setup()
 
         // Para usuários logados sem permissão de moderação,
         // mostrar aprovados + seus próprios comentários não aprovados
+        $user_condition = $wpdb->prepare("(comment_approved = '1' OR (comment_approved = '0' AND user_id = %d))", $current_user_id);
         $clauses['where'] = str_replace(
             "comment_approved = '1'",
-            "(comment_approved = '1' OR (comment_approved = '0' AND user_id = {$current_user_id}))",
+            $user_condition,
             $clauses['where']
         );
 
@@ -847,7 +926,7 @@ function theme_notify_comment_reply($comment_id, $comment)
     }
 
     // Não notificar se responder a si mesmo
-    if ($parent_comment->user_id == $comment->user_id) {
+    if ($parent_comment->user_id === $comment->user_id) {
         return;
     }
 
@@ -926,7 +1005,7 @@ function theme_comment_template($comment, $args, $depth)
                                 <time datetime="<?php comment_time('c'); ?>">
                                     <?php printf('%s às %s', get_comment_date('d/m/Y'), get_comment_time('H:i')); ?>
                                 </time>
-                                <?php if ('0' == $comment->comment_approved): ?>
+                                <?php if ('0' === $comment->comment_approved): ?>
                                     <span class="badge bg-warning text-dark ms-2">Aguardando moderação</span>
                                 <?php endif; ?>
                             </div>
@@ -974,7 +1053,7 @@ function theme_comment_template($comment, $args, $depth)
                             echo '<div class="reply mt-2">' . $reply_link;
 
                             // Botão de deletar (apenas para o autor do comentário)
-                            if (is_user_logged_in() && $comment->user_id == get_current_user_id()) {
+                            if (is_user_logged_in() && $comment->user_id === get_current_user_id()) {
                                 echo ' <span class="text-muted">•</span> ';
                                 echo '<button type="button" class="btn btn-link btn-sm text-danger text-decoration-none p-0 delete-comment-btn" data-comment-id="' . get_comment_ID() . '">Deletar</button>';
                             }

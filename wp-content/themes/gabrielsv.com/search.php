@@ -1,11 +1,11 @@
 <?php get_header(); ?>
 
-<main class="container my-5">
-    <header class="mb-5">
-        <h1 class="display-5 fw-bold mb-3">
+<main class="container my-6">
+    <header class="mb-6">
+        <h1 class="title is-2 has-text-weight-bold mb-3">
             Resultados da Pesquisa
         </h1>
-        <p class="text-muted lead">
+        <p class="has-text-grey subtitle">
             <?php
             global $wp_query;
             $total = $wp_query->found_posts;
@@ -23,10 +23,10 @@
     </header>
 
     <?php if (have_posts()): ?>
-        <div class="row g-4 mb-5">
+        <div class="columns is-multiline is-variable is-4 mb-6">
             <?php while (have_posts()):
                 the_post(); ?>
-                <article class="col-md-6 col-lg-4">
+                <article class="column is-6-tablet is-4-desktop">
                     <?php get_template_part('template-parts/post-card'); ?>
                 </article>
             <?php endwhile; ?>
@@ -36,25 +36,29 @@
         <?php theme_bootstrap_pagination(); ?>
 
     <?php else: ?>
-        <div class="text-center py-5">
-            <h2 class="h4 fw-bold mb-3">Nenhum resultado encontrado</h2>
-            <p class="text-muted mb-4">Tente refinar sua pesquisa com outras palavras-chave.</p>
+        <div class="has-text-centered py-6">
+            <h2 class="title is-4 has-text-weight-bold mb-3">Nenhum resultado encontrado</h2>
+            <p class="has-text-grey mb-4">Tente refinar sua pesquisa com outras palavras-chave.</p>
 
             <?php // Formulário de pesquisa ?>
-            <form role="search" method="get" class="d-flex justify-content-center mb-4"
+            <form role="search" method="get" class="is-flex is-justify-content-center mb-4"
                 action="<?php echo home_url('/'); ?>">
-                <div class="input-group" style="max-width: 500px;">
-                    <input type="search" class="form-control" placeholder="Pesquisar..."
-                        value="<?php echo get_search_query(); ?>" name="s">
-                    <button class="btn btn-primary" type="submit">Pesquisar</button>
+                <div class="field has-addons" style="max-width: 500px;">
+                    <div class="control is-expanded">
+                        <input type="search" class="input" placeholder="Pesquisar..."
+                            value="<?php echo get_search_query(); ?>" name="s">
+                    </div>
+                    <div class="control">
+                        <button class="button is-primary" type="submit">Pesquisar</button>
+                    </div>
                 </div>
             </form>
 
-            <a href="<?php echo home_url('/'); ?>" class="btn btn-theme d-inline-flex align-items-center gap-2">
-                <span style="width: 20px; height: 20px; display: inline-flex;">
+            <a href="<?php echo home_url('/'); ?>" class="button is-primary is-inline-flex is-align-items-center" style="gap: 0.5rem;">
+                <span class="icon" style="width: 20px; height: 20px;">
                     <?php get_template_part('template-parts/icons/home'); ?>
                 </span>
-                Voltar ao Início
+                <span>Voltar ao Início</span>
             </a>
         </div>
     <?php endif; ?>

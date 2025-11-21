@@ -12,13 +12,10 @@
 
         if (!empty($categories)):
             foreach ($categories as $category):
-                // Renomear a categoria padrão do WordPress
-                $default_category_id = get_option('default_category');
-                $category_name = ($category->term_id == $default_category_id) ? 'Rabiscos' : $category->name;
                 ?>
                 <li>
                     <a class="dropdown-item" href="<?php echo esc_url(get_category_link($category->term_id)); ?>">
-                        <?php echo esc_html($category_name); ?>
+                        <?php echo esc_html(theme_get_category_name($category)); ?>
                         <span class="badge bg-secondary ms-2"><?php echo $category->count; ?></span>
                     </a>
                 </li>

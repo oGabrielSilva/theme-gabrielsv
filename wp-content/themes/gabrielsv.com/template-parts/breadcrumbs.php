@@ -11,11 +11,10 @@
             $categories = get_the_category();
             if (!empty($categories)):
                 $category = $categories[0];
-                $category_name = ($category->term_id == get_option('default_category')) ? 'Rabiscos' : $category->name;
                 ?>
                 <li class="breadcrumb-item">
                     <a href="<?php echo get_category_link($category->term_id); ?>" class="text-decoration-none">
-                        <?php echo esc_html($category_name); ?>
+                        <?php echo esc_html(theme_get_category_name($category)); ?>
                     </a>
                 </li>
             <?php endif; ?>

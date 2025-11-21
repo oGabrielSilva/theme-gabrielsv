@@ -1,21 +1,21 @@
 <?php get_header(); ?>
 
-<main class="container my-5">
-    <header class="mb-5">
-        <div class="row g-4 mb-4">
-            <div class="col-md-auto d-flex justify-content-center">
-                <?php echo get_avatar(get_the_author_meta('ID'), 120, '', get_the_author(), array('class' => 'rounded-circle')); ?>
+<main class="container my-6">
+    <header class="mb-6">
+        <div class="columns is-variable is-4 mb-4">
+            <div class="column is-narrow is-flex is-justify-content-center">
+                <?php echo get_avatar(get_the_author_meta('ID'), 120, '', get_the_author(), array('class' => 'is-rounded')); ?>
             </div>
-            <div class="col">
-                <h1 class="h3 fw-bold mb-3">
+            <div class="column">
+                <h1 class="title is-3 has-text-weight-bold mb-3">
                     <?php the_author(); ?>
                 </h1>
                 <?php if (get_the_author_meta('description')): ?>
-                    <p class="text-muted mb-3">
+                    <p class="has-text-grey mb-3">
                         <?php echo get_the_author_meta('description'); ?>
                     </p>
                 <?php endif; ?>
-                <div class="text-muted small mb-3">
+                <div class="has-text-grey is-size-7 mb-3">
                     <?php
                     $post_count = count_user_posts(get_the_author_meta('ID'));
                     printf(_n('%s post publicado', '%s posts publicados', $post_count), number_format_i18n($post_count));
@@ -23,31 +23,28 @@
                 </div>
 
                 <?php // Links de Contato ?>
-                <div class="btn-group" role="group" aria-label="Links de contato">
+                <div class="buttons are-small" role="group" aria-label="Links de contato">
                     <?php
                     $author_website = get_the_author_meta('user_url');
                     if ($author_website):
                         ?>
-                        <a href="<?php echo esc_url($author_website); ?>" class="btn btn-sm btn-theme" target="_blank"
+                        <a href="<?php echo esc_url($author_website); ?>" class="button is-primary" target="_blank"
                             rel="noopener noreferrer" aria-label="Website de <?php the_author(); ?>">
-                            <span>
+                            <span class="icon">
                                 <?php get_template_part('template-parts/icons/globe'); ?>
                             </span>
                         </a>
                     <?php endif; ?>
 
                     <?php
-                    // E-mail removido por segurança - evita exposição pública de endereços de e-mail
-                    // Se necessário no futuro, implementar formulário de contato ao invés de mailto:
-                    ?>
-
-                    <?php
                     $author_twitter = get_the_author_meta('twitter');
                     if ($author_twitter):
                         ?>
-                        <a href="<?php echo esc_url($author_twitter); ?>" class="btn btn-sm btn-theme" target="_blank"
+                        <a href="<?php echo esc_url($author_twitter); ?>" class="button is-primary" target="_blank"
                             rel="noopener noreferrer" aria-label="Twitter de <?php the_author(); ?>">
-                            <?php get_template_part('template-parts/icons/twitter'); ?>
+                            <span class="icon">
+                                <?php get_template_part('template-parts/icons/twitter'); ?>
+                            </span>
                         </a>
                     <?php endif; ?>
 
@@ -55,10 +52,11 @@
                     $author_linkedin = get_the_author_meta('linkedin');
                     if ($author_linkedin):
                         ?>
-                        <a href="<?php echo esc_url($author_linkedin); ?>" class="btn btn-sm btn-theme" target="_blank"
+                        <a href="<?php echo esc_url($author_linkedin); ?>" class="button is-primary" target="_blank"
                             rel="noopener noreferrer" aria-label="LinkedIn de <?php the_author(); ?>">
-                            <?php get_template_part('template-parts/icons/linkedin'); ?>
-
+                            <span class="icon">
+                                <?php get_template_part('template-parts/icons/linkedin'); ?>
+                            </span>
                         </a>
                     <?php endif; ?>
 
@@ -66,10 +64,11 @@
                     $author_github = get_the_author_meta('github');
                     if ($author_github):
                         ?>
-                        <a href="<?php echo esc_url($author_github); ?>" class="btn btn-sm btn-theme" target="_blank"
+                        <a href="<?php echo esc_url($author_github); ?>" class="button is-primary" target="_blank"
                             rel="noopener noreferrer" aria-label="GitHub de <?php the_author(); ?>">
-                            <?php get_template_part('template-parts/icons/github'); ?>
-
+                            <span class="icon">
+                                <?php get_template_part('template-parts/icons/github'); ?>
+                            </span>
                         </a>
                     <?php endif; ?>
                 </div>
@@ -78,10 +77,10 @@
     </header>
 
     <?php if (have_posts()): ?>
-        <div class="row g-4 mb-5">
+        <div class="columns is-multiline is-variable is-4 mb-6">
             <?php while (have_posts()):
                 the_post(); ?>
-                <article class="col-md-6 col-lg-4">
+                <article class="column is-6-tablet is-4-desktop">
                     <?php get_template_part('template-parts/post-card'); ?>
                 </article>
             <?php endwhile; ?>
@@ -91,10 +90,10 @@
         <?php theme_bootstrap_pagination(); ?>
 
     <?php else: ?>
-        <div class="text-center py-5">
-            <h2 class="h4 fw-bold mb-3">Nenhum post publicado ainda</h2>
-            <p class="text-muted">Este autor ainda não publicou nenhum conteúdo.</p>
-            <a href="<?php echo home_url('/'); ?>" class="btn btn-theme mt-3">Voltar ao Início</a>
+        <div class="has-text-centered py-6">
+            <h2 class="title is-4 has-text-weight-bold mb-3">Nenhum post publicado ainda</h2>
+            <p class="has-text-grey">Este autor ainda não publicou nenhum conteúdo.</p>
+            <a href="<?php echo home_url('/'); ?>" class="button is-primary mt-3">Voltar ao Início</a>
         </div>
     <?php endif; ?>
 </main>

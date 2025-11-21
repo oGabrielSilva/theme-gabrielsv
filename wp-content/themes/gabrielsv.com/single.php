@@ -1,6 +1,6 @@
 <?php get_header(); ?>
 
-<main class="container my-5">
+<main class="container my-6">
     <?php while (have_posts()):
         the_post(); ?>
 
@@ -8,8 +8,8 @@
         <?php get_template_part('template-parts/breadcrumbs'); ?>
 
         <?php // Header do Post (Full Width) ?>
-        <header class="mb-5">
-            <h1 class="display-5 fw-bold mb-3"><?php the_title(); ?></h1>
+        <header class="mb-6">
+            <h1 class="title is-2 has-text-weight-bold mb-3"><?php the_title(); ?></h1>
 
             <div class="mb-4">
                 <?php get_template_part('template-parts/post-meta'); ?>
@@ -18,59 +18,59 @@
             <?php if (has_post_thumbnail()): ?>
                 <div class="mb-4">
                     <?php the_post_thumbnail('large', array(
-                        'class' => 'img-fluid rounded-5 mx-auto d-block',
+                        'class' => 'image mx-auto',
+                        'style' => 'border-radius: 1.5rem; display: block;',
                         'alt' => get_the_title()
                     )); ?>
                 </div>
             <?php endif; ?>
         </header>
 
-        <div class="row">
+        <div class="columns">
             <?php // Conteúdo Principal ?>
-            <div class="col-lg-8">
-                <article id="post-<?php the_ID(); ?>" <?php post_class('pb-5 pe-lg-4'); ?>>
+            <div class="column is-8-desktop">
+                <article id="post-<?php the_ID(); ?>" <?php post_class('pb-6 pr-4-desktop'); ?>>
 
                     <?php // Conteúdo do Post ?>
-                    <div class="post-content mb-5">
+                    <div class="post-content content mb-6">
                         <?php the_content(); ?>
                     </div>
 
                     <?php // Footer do Post ?>
-                    <footer class="post-footer pt-4 border-top">
+                    <footer class="post-footer pt-4" style="border-top: 1px solid #dbdbdb;">
                         <div class="mb-4">
-                            <span class="small text-muted fw-bold">Tags: </span>
+                            <span class="is-size-7 has-text-grey has-text-weight-bold">Tags: </span>
                             <?php
                             $tags = get_the_tags();
                             if ($tags):
                                 $tag_links = array();
                                 foreach ($tags as $tag):
-                                    $tag_links[] = '<a href="' . esc_url(get_tag_link($tag->term_id)) . '" class="text-decoration-none small" aria-label="Ver posts com a tag ' . esc_attr($tag->name) . '">' . esc_html($tag->name) . '</a>';
+                                    $tag_links[] = '<a href="' . esc_url(get_tag_link($tag->term_id)) . '" class="is-size-7" style="text-decoration: none;" aria-label="Ver posts com a tag ' . esc_attr($tag->name) . '">' . esc_html($tag->name) . '</a>';
                                 endforeach;
                                 echo implode(', ', $tag_links);
                             else: ?>
-                                <span class="small text-muted">Nenhuma tag</span>
+                                <span class="is-size-7 has-text-grey">Nenhuma tag</span>
                             <?php endif; ?>
                         </div>
 
                         <?php // Card do Autor ?>
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body">
-                                <a href="<?php echo esc_url(get_author_posts_url(get_the_author_meta('ID'))); ?>"
-                                    class="d-flex flex-column flex-md-row gap-3 align-items-start text-decoration-none"
-                                    aria-label="Ver perfil de <?php the_author(); ?>">
-                                    <div class="flex-shrink-0">
-                                        <?php echo get_avatar(get_the_author_meta('ID'), 80, '', get_the_author(), array('class' => 'rounded-circle')); ?>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h3 class="h6 fw-bold mb-1 text-body"><?php the_author(); ?></h3>
-                                        <?php if (get_the_author_meta('description')): ?>
-                                            <p class="text-muted small mb-0">
-                                                <?php echo get_the_author_meta('description'); ?>
-                                            </p>
-                                        <?php endif; ?>
-                                    </div>
-                                </a>
-                            </div>
+                        <div class="box">
+                            <a href="<?php echo esc_url(get_author_posts_url(get_the_author_meta('ID'))); ?>"
+                                class="is-flex is-flex-direction-column is-flex-direction-row-tablet is-align-items-flex-start"
+                                style="gap: 1rem; text-decoration: none;"
+                                aria-label="Ver perfil de <?php the_author(); ?>">
+                                <div class="is-flex-shrink-0">
+                                    <?php echo get_avatar(get_the_author_meta('ID'), 80, '', get_the_author(), array('class' => 'is-rounded')); ?>
+                                </div>
+                                <div class="is-flex-grow-1">
+                                    <h3 class="title is-6 has-text-weight-bold mb-1"><?php the_author(); ?></h3>
+                                    <?php if (get_the_author_meta('description')): ?>
+                                        <p class="content has-text-grey is-size-7 mb-0">
+                                            <?php echo get_the_author_meta('description'); ?>
+                                        </p>
+                                    <?php endif; ?>
+                                </div>
+                            </a>
                         </div>
                     </footer>
 
@@ -85,8 +85,8 @@
             </div>
 
             <?php // Sidebar ?>
-            <aside class="col-lg-4">
-                <div class="pb-5">
+            <aside class="column is-4-desktop">
+                <div class="pb-6">
                     <?php get_template_part('template-parts/post-categories'); ?>
                 </div>
 
@@ -94,18 +94,21 @@
                 <?php
                 $categories = wp_get_post_categories(get_the_ID());
                 if (!empty($categories)):
-                    $related_posts = new WP_Query(array(
-                        'category__in' => $categories,
-                        'post__not_in' => array(get_the_ID()),
-                        'posts_per_page' => 4,
-                        'post_status' => 'publish'
-                    ));
+                    $related_posts = theme_get_cached_query(
+                        'related_posts_' . get_the_ID(),
+                        array(
+                            'category__in' => $categories,
+                            'post__not_in' => array(get_the_ID()),
+                            'posts_per_page' => 4,
+                            'post_status' => 'publish'
+                        )
+                    );
 
                     if ($related_posts->have_posts()):
                         ?>
-                        <section class="mb-5">
-                            <h2 class="h6 fw-bold mb-3">Posts Relacionados</h2>
-                            <div class="d-flex flex-column gap-3">
+                        <section class="mb-6">
+                            <h2 class="title is-6 has-text-weight-bold mb-3">Posts Relacionados</h2>
+                            <div class="is-flex is-flex-direction-column" style="gap: 1rem;">
                                 <?php while ($related_posts->have_posts()):
                                     $related_posts->the_post();
                                     get_template_part('template-parts/post-card-small');
@@ -122,17 +125,20 @@
 
                 <?php // Últimos Posts ?>
                 <?php
-                $latest_posts = new WP_Query(array(
-                    'posts_per_page' => 4,
-                    'post_status' => 'publish',
-                    'post__not_in' => array(get_the_ID())
-                ));
+                $latest_posts = theme_get_cached_query(
+                    'latest_posts_' . get_the_ID(),
+                    array(
+                        'posts_per_page' => 4,
+                        'post_status' => 'publish',
+                        'post__not_in' => array(get_the_ID())
+                    )
+                );
 
                 if ($latest_posts->have_posts()):
                     ?>
-                    <section class="mb-5">
-                        <h2 class="h6 fw-bold mb-3">Últimos Posts</h2>
-                        <div class="d-flex flex-column gap-3">
+                    <section class="mb-6">
+                        <h2 class="title is-6 has-text-weight-bold mb-3">Últimos Posts</h2>
+                        <div class="is-flex is-flex-direction-column" style="gap: 1rem;">
                             <?php while ($latest_posts->have_posts()):
                                 $latest_posts->the_post();
                                 get_template_part('template-parts/post-card-small');
@@ -148,18 +154,21 @@
 
                 <?php // Posts do Mesmo Autor ?>
                 <?php
-                $author_posts = new WP_Query(array(
-                    'author' => get_the_author_meta('ID'),
-                    'post__not_in' => array(get_the_ID()),
-                    'posts_per_page' => 4,
-                    'post_status' => 'publish'
-                ));
+                $author_posts = theme_get_cached_query(
+                    'author_posts_' . get_the_ID() . '_' . get_the_author_meta('ID'),
+                    array(
+                        'author' => get_the_author_meta('ID'),
+                        'post__not_in' => array(get_the_ID()),
+                        'posts_per_page' => 4,
+                        'post_status' => 'publish'
+                    )
+                );
 
                 if ($author_posts->have_posts()):
                     ?>
-                    <section class="mb-5">
-                        <h2 class="h6 fw-bold mb-3">Mais de <?php the_author(); ?></h2>
-                        <div class="d-flex flex-column gap-3">
+                    <section class="mb-6">
+                        <h2 class="title is-6 has-text-weight-bold mb-3">Mais de <?php the_author(); ?></h2>
+                        <div class="is-flex is-flex-direction-column" style="gap: 1rem;">
                             <?php while ($author_posts->have_posts()):
                                 $author_posts->the_post();
                                 get_template_part('template-parts/post-card-small');
