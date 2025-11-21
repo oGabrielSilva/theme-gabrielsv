@@ -11,11 +11,11 @@ if (post_password_required()) {
 <div id="comments" class="comments-area mt-5">
 
     <?php if (have_comments()): ?>
-        <h2 class="comments-title h4 fw-bold mb-4">
+        <h2 class="comments-title title is-4 has-text-weight-bold mb-4">
             Comentários
         </h2>
 
-        <ol class="comment-list list-unstyled">
+        <ol class="comment-list" style="list-style: none; padding: 0;">
             <?php
             wp_list_comments(array(
                 'style' => 'ol',
@@ -46,26 +46,28 @@ if (post_password_required()) {
 
             comment_form(array(
                 'title_reply' => 'Deixe um comentário',
-                'title_reply_before' => '<h3 class="h5 fw-bold mb-2">',
-                'title_reply_after' => '</h3><p class="text-muted mb-3">' . sprintf('O que você está pensando, %s?', esc_html($user_first_name)) . '</p>',
+                'title_reply_before' => '<h3 class="title is-5 has-text-weight-bold mb-2">',
+                'title_reply_after' => '</h3><p class="has-text-grey mb-3">' . sprintf('O que você está pensando, %s?', esc_html($user_first_name)) . '</p>',
                 'title_reply_to' => 'Responder para %s',
                 'cancel_reply_link' => 'Cancelar',
                 'label_submit' => 'Comentar',
-                'class_submit' => 'btn btn-primary',
+                'class_submit' => 'button is-primary',
                 'logged_in_as' => '', // Remove a linha "Conectado como..."
-                'comment_field' => '<div class="mb-3">
-                    <label for="comment" class="form-label visually-hidden">Seu comentário</label>
-                    <textarea id="comment" name="comment" class="form-control" rows="5" placeholder="Compartilhe sua opinião..." required></textarea>
+                'comment_field' => '<div class="field mb-3">
+                    <label for="comment" class="label is-sr-only">Seu comentário</label>
+                    <div class="control">
+                        <textarea id="comment" name="comment" class="textarea" rows="5" placeholder="Compartilhe sua opinião..." required></textarea>
+                    </div>
                 </div>',
-                'submit_button' => '<button type="submit" name="submit" id="submit" class="btn btn-primary">%4$s</button>',
+                'submit_button' => '<button type="submit" name="submit" id="submit" class="button is-primary">%4$s</button>',
                 'comment_notes_before' => '', // Remove "campos obrigatórios"
                 'comment_notes_after' => '',
             ));
         else:
             ?>
-            <div class="alert alert-secondary mt-4">
+            <div class="notification is-light mt-4">
                 <p class="mb-0">
-                    Você precisa estar <a href="<?php echo home_url('/auth?redirect_to=' . urlencode(get_permalink())); ?>" class="alert-link">logado</a> para
+                    Você precisa estar <a href="<?php echo home_url('/auth?redirect_to=' . urlencode(get_permalink())); ?>" class="has-text-link">logado</a> para
                     comentar.
                 </p>
             </div>
@@ -75,77 +77,62 @@ if (post_password_required()) {
     ?>
 
     <?php // Modal: Login Obrigatório ?>
-    <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="loginRequiredModalLabel">Login Necessário</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body text-center py-4">
-                    <p class="mb-4">Você precisa estar logado para responder comentários.</p>
-                    <a href="<?php echo home_url('/auth?redirect_to=' . urlencode(get_permalink())); ?>" class="btn btn-primary">
-                        Fazer Login
-                    </a>
-                </div>
-            </div>
+    <div class="modal" id="loginRequiredModal">
+        <div class="modal-background" data-modal-close="loginRequiredModal"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Login Necessário</p>
+                <button class="delete" aria-label="close" data-modal-close="loginRequiredModal"></button>
+            </header>
+            <section class="modal-card-body has-text-centered py-4">
+                <p class="mb-4">Você precisa estar logado para responder comentários.</p>
+                <a href="<?php echo home_url('/auth?redirect_to=' . urlencode(get_permalink())); ?>" class="button is-primary">
+                    Fazer Login
+                </a>
+            </section>
         </div>
     </div>
 
     <?php // Modal para Responder Comentário ?>
-    <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="replyModalLabel">Responder comentário</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body">
-                    <?php // Comentário Original ?>
-                    <div class="card border mb-3">
-                        <div class="card-body bg-body-secondary">
-                            <div class="d-flex gap-2 align-items-start mb-2">
-                                <img id="replyAuthorAvatar" src="" alt="" class="rounded-circle" width="40" height="40">
-                                <div>
-                                    <strong id="replyAuthorName" class="d-block"></strong>
-                                    <small class="text-body-secondary" id="replyCommentDate"></small>
-                                </div>
-                            </div>
-                            <div id="replyCommentContent" class="small text-body-secondary"></div>
+    <div class="modal" id="replyModal">
+        <div class="modal-background" data-modal-close="replyModal"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Responder comentário</p>
+                <button class="delete" aria-label="close" data-modal-close="replyModal"></button>
+            </header>
+            <section class="modal-card-body">
+                <?php // Comentário Original ?>
+                <div class="box has-background-light mb-3">
+                    <div class="is-flex is-align-items-start mb-2" style="gap: 0.5rem;">
+                        <img id="replyAuthorAvatar" src="" alt="" class="is-rounded" width="40" height="40">
+                        <div>
+                            <strong id="replyAuthorName" class="is-block"></strong>
+                            <small class="has-text-grey" id="replyCommentDate"></small>
                         </div>
                     </div>
-
-                    <?php // Formulário de Resposta ?>
-                    <div id="replyFormContainer"></div>
+                    <div id="replyCommentContent" class="is-size-7 has-text-grey"></div>
                 </div>
-            </div>
+
+                <?php // Formulário de Resposta ?>
+                <div id="replyFormContainer"></div>
+            </section>
         </div>
     </div>
 
     <?php // Modal de Confirmação: Deletar Comentário ?>
-    <div class="modal fade" id="deleteCommentModal" tabindex="-1" aria-labelledby="deleteCommentModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title" id="deleteCommentModalLabel">Deletar comentário?</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body text-center pb-4">
-                    <p class="text-muted mb-4">Esta ação não pode ser desfeita.</p>
-                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteCommentBtn">Deletar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <?php // Toast Container ?>
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
-        <div id="commentToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body" id="commentToastBody"></div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
-            </div>
+    <div class="modal" id="deleteCommentModal">
+        <div class="modal-background" data-modal-close="deleteCommentModal"></div>
+        <div class="modal-card is-small">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Deletar comentário?</p>
+                <button class="delete" aria-label="close" data-modal-close="deleteCommentModal"></button>
+            </header>
+            <section class="modal-card-body has-text-centered pb-4">
+                <p class="has-text-grey mb-4">Esta ação não pode ser desfeita.</p>
+                <button type="button" class="button is-light mr-2" data-modal-close="deleteCommentModal">Cancelar</button>
+                <button type="button" class="button is-danger" id="confirmDeleteCommentBtn">Deletar</button>
+            </section>
         </div>
     </div>
 

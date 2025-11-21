@@ -1,8 +1,8 @@
-<li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+<div class="navbar-item has-dropdown is-hoverable">
+    <a class="navbar-link">
         Explore
     </a>
-    <ul class="dropdown-menu">
+    <div class="navbar-dropdown">
         <?php
         $categories = get_categories(array(
             'orderby' => 'name',
@@ -13,15 +13,13 @@
         if (!empty($categories)):
             foreach ($categories as $category):
                 ?>
-                <li>
-                    <a class="dropdown-item" href="<?php echo esc_url(get_category_link($category->term_id)); ?>">
-                        <?php echo esc_html(theme_get_category_name($category)); ?>
-                        <span class="badge bg-secondary ms-2"><?php echo $category->count; ?></span>
-                    </a>
-                </li>
+                <a class="navbar-item is-flex is-justify-content-space-between" href="<?php echo esc_url(get_category_link($category->term_id)); ?>">
+                    <span><?php echo esc_html(theme_get_category_name($category)); ?></span>
+                    <span class="tag is-light ml-2"><?php echo $category->count; ?></span>
+                </a>
             <?php endforeach;
         else: ?>
-            <li><span class="dropdown-item-text text-muted">Nenhum assunto encontrado</span></li>
+            <span class="navbar-item has-text-grey">Nenhum assunto encontrado</span>
         <?php endif; ?>
-    </ul>
-</li>
+    </div>
+</div>

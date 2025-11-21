@@ -15,22 +15,22 @@ if ($post && $post->post_name === 'politica-de-cookies') {
 }
 ?>
 
-<div id="cookie-banner" class="position-fixed bottom-0 start-0 end-0 shadow-lg"
-    style="background-color: rgba(00,00,00,0.75); z-index: 9998; display: none;" role="banner">
+<div id="cookie-banner" class="is-fixed"
+    style="background-color: rgba(0,0,0,0.75); z-index: 9998; display: none; bottom: 0; left: 0; right: 0;" role="banner">
 
     <div class="container py-3">
-        <div class="row align-items-center g-3">
-            <div class="col-lg-10 col-md-9">
-                <p class="text-white small mb-0">
+        <div class="columns is-variable is-3 is-vcentered is-mobile">
+            <div class="column">
+                <p class="has-text-white is-size-7 mb-0">
                     Este site usa cookies.
                     <a href="<?php echo esc_url(home_url('/politica-de-cookies')); ?>"
-                        class="text-white text-decoration-underline">
+                        class="has-text-white" style="text-decoration: underline;">
                         Saiba mais
                     </a>
                 </p>
             </div>
-            <div class="col-lg-2 col-md-3 text-md-end">
-                <button type="button" id="cookie-accept-btn" class="btn btn-primary btn-sm w-100 w-md-auto">
+            <div class="column is-narrow">
+                <button type="button" id="cookie-accept-btn" class="button is-primary is-small">
                     Ok
                 </button>
             </div>

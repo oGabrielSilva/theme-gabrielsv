@@ -1,8 +1,8 @@
 <?php // Breadcrumbs ?>
 <nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb small">
-        <li class="breadcrumb-item">
-            <a href="<?php echo home_url('/'); ?>" class="text-decoration-none">Início</a>
+    <ul class="breadcrumb is-size-7">
+        <li>
+            <a href="<?php echo home_url('/'); ?>">Início</a>
         </li>
 
         <?php
@@ -12,52 +12,52 @@
             if (!empty($categories)):
                 $category = $categories[0];
                 ?>
-                <li class="breadcrumb-item">
-                    <a href="<?php echo get_category_link($category->term_id); ?>" class="text-decoration-none">
+                <li>
+                    <a href="<?php echo get_category_link($category->term_id); ?>">
                         <?php echo esc_html(theme_get_category_name($category)); ?>
                     </a>
                 </li>
             <?php endif; ?>
-            <li class="breadcrumb-item active" aria-current="page">
-                <?php the_title(); ?>
+            <li class="is-active">
+                <a aria-current="page"><?php the_title(); ?></a>
             </li>
 
         <?php elseif (is_category()): ?>
             <?php // Categoria: Início > Nome da Categoria ?>
-            <li class="breadcrumb-item active" aria-current="page">
-                <?php single_cat_title(); ?>
+            <li class="is-active">
+                <a aria-current="page"><?php single_cat_title(); ?></a>
             </li>
 
         <?php elseif (is_tag()): ?>
             <?php // Tag: Início > Tag ?>
-            <li class="breadcrumb-item active" aria-current="page">
-                <?php single_tag_title(); ?>
+            <li class="is-active">
+                <a aria-current="page"><?php single_tag_title(); ?></a>
             </li>
 
         <?php elseif (is_author()): ?>
             <?php // Autor: Início > Autor ?>
-            <li class="breadcrumb-item active" aria-current="page">
-                <?php the_author(); ?>
+            <li class="is-active">
+                <a aria-current="page"><?php the_author(); ?></a>
             </li>
 
         <?php elseif (is_search()): ?>
             <?php // Busca: Início > Resultados da Pesquisa ?>
-            <li class="breadcrumb-item active" aria-current="page">
-                Resultados da Pesquisa
+            <li class="is-active">
+                <a aria-current="page">Resultados da Pesquisa</a>
             </li>
 
         <?php elseif (is_404()): ?>
             <?php // 404: Início > Página não encontrada ?>
-            <li class="breadcrumb-item active" aria-current="page">
-                Página não encontrada
+            <li class="is-active">
+                <a aria-current="page">Página não encontrada</a>
             </li>
 
         <?php elseif (is_page()): ?>
             <?php // Página: Início > Título da Página ?>
-            <li class="breadcrumb-item active" aria-current="page">
-                <?php the_title(); ?>
+            <li class="is-active">
+                <a aria-current="page"><?php the_title(); ?></a>
             </li>
 
         <?php endif; ?>
-    </ol>
+    </ul>
 </nav>
