@@ -32,12 +32,6 @@ if (!is_user_logged_in()) {
         </div>
         <div class="dropdown-menu" id="userDropdown" role="menu">
             <div class="dropdown-content">
-                <a class="dropdown-item is-flex is-align-items-center" style="gap: 0.5rem;" href="<?php echo home_url('/eu'); ?>">
-                    <span class="icon is-small">
-                        <?php get_template_part('template-parts/icons/user'); ?>
-                    </span>
-                    <span>Meu Perfil</span>
-                </a>
                 <?php if ($can_access_admin): ?>
                     <a class="dropdown-item is-flex is-align-items-center" style="gap: 0.5rem;" href="<?php echo admin_url(); ?>">
                         <span class="icon is-small">
@@ -45,8 +39,8 @@ if (!is_user_logged_in()) {
                         </span>
                         <span>Painel Administrativo</span>
                     </a>
+                    <hr class="dropdown-divider">
                 <?php endif; ?>
-                <hr class="dropdown-divider">
                 <a class="dropdown-item is-flex is-align-items-center" style="gap: 0.5rem;" href="<?php echo wp_logout_url(home_url()); ?>">
                     <span class="icon is-small">
                         <?php get_template_part('template-parts/icons/log-out'); ?>
