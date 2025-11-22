@@ -900,55 +900,6 @@ function theme_bootstrap_pagination($args = array())
     echo '</nav>';
 }
 
-// Configurações de comentários
-function theme_comments_setup()
-{
-    // Bloquear envio de comentários para usuários deslogados
-    add_filter('pre_comment_on_post', function ($post_id) {
-        if (!is_user_logged_in()) {
-            wp_die('Você precisa estar logado para comentar.', 'Erro', array('response' => 403));
-        }
-    });
-
-    // Forçar aprovação manual de todos os comentários
-    add_filter('pre_comment_approved', function ($approved) {
-        return 0; // 0 = aguardando moderação
-    });
-
-    // Modificar query SQL para incluir comentários não aprovados quando necessário
-    add_filter('comments_clauses', function ($clauses, $query) {
-        global $wpdb;
-        $current_user_id = get_current_user_id();
-
-        // Se não está logado, manter comportamento padrão (só aprovados)
-        if (!$current_user_id) {
-            return $clauses;
-        }
-
-        // Se tem permissão de moderação, mostrar todos os comentários
-        if (current_user_can('moderate_comments')) {
-            $clauses['where'] = str_replace(
-                "comment_approved = '1'",
-                "(comment_approved = '1' OR comment_approved = '0')",
-                $clauses['where']
-            );
-            return $clauses;
-        }
-
-        // Para usuários logados sem permissão de moderação,
-        // mostrar aprovados + seus próprios comentários não aprovados
-        $user_condition = $wpdb->prepare("(comment_approved = '1' OR (comment_approved = '0' AND user_id = %d))", $current_user_id);
-        $clauses['where'] = str_replace(
-            "comment_approved = '1'",
-            $user_condition,
-            $clauses['where']
-        );
-
-        return $clauses;
-    }, 10, 2);
-}
-add_action('init', 'theme_comments_setup');
-
 // ============================================
 // EMAIL NOTIFICATIONS - COMENTÁRIOS
 // ============================================
@@ -1065,80 +1016,6 @@ function theme_notify_comment_reply($comment_id, $comment)
 add_action('comment_post', 'theme_notify_comment_reply', 10, 2);
 */
 
-// Template customizado para comentários individuais
-function theme_comment_template($comment, $args, $depth)
-{
-    $tag = ('div' === $args['style']) ? 'div' : 'li';
-
-    // Lógica PHP fica separada no topo
-    $is_post_author = ($comment->user_id == get_the_author_meta('ID'));
-    $avatar_size = 32; // Tamanho reduzido para economizar espaço
-
-    // Prepara link de resposta para não poluir o HTML abaixo
-    $reply_args = array_merge($args, array(
-        'depth' => $depth,
-        'max_depth' => $args['max_depth'],
-        'reply_text' => 'Responder',
-        'add_below' => 'comment',
-    ));
-    ?>
-
-    <<?php echo $tag; ?> id="comment-<?php comment_ID(); ?>" <?php comment_class('compact-comment mb-1', $comment); ?>>
-
-        <div class="media mb-0 pt-2 pb-2" style="border: none;">
-
-            <div class="media-left mr-2">
-                <figure class="image is-32x32">
-                    <?php echo get_avatar($comment, $avatar_size, '', '', array('class' => 'is-rounded')); ?>
-                </figure>
-            </div>
-
-            <div class="media-content">
-
-                <div class="content is-size-7 mb-1">
-                    <strong><?php echo get_comment_author_link($comment); ?></strong>
-
-                    <?php if ($is_post_author): ?>
-                        <span class="tag is-primary is-rounded ml-1"
-                            style="font-size: 0.6rem; height: 1.5em; padding: 0 0.5em;">Autor</span>
-                    <?php endif; ?>
-
-                    <span style="opacity: 0.6;" class="mx-1">•</span>
-
-                    <time style="opacity: 0.7;" datetime="<?php comment_time('c'); ?>">
-                        <?php printf('%s', get_comment_date()); ?>
-                    </time>
-                </div>
-
-                <div class="content is-size-6 mb-1 text-break">
-                    <?php if ('0' === $comment->comment_approved): ?>
-                        <p class="is-size-7" style="font-style: italic; opacity: 0.8;">Aguardando moderação.</p>
-                    <?php endif; ?>
-
-                    <?php comment_text(); ?>
-                </div>
-
-                <div class="is-size-7">
-                    <?php
-                    // O WP retorna o link como string, então apenas imprimimos o resultado
-                    comment_reply_link($reply_args);
-                    ?>
-
-                    <?php if (is_user_logged_in() && $comment->user_id === get_current_user_id()): ?>
-                        <span style="opacity: 0.5;" class="mx-1">|</span>
-                        <button type="button" class="button-reset delete-comment-btn" data-comment-id="<?php comment_ID(); ?>"
-                            style="border:none; background:none; padding:0; color: inherit; cursor: pointer; font-size: inherit; opacity: 0.8;">
-                            Excluir
-                        </button>
-                    <?php endif; ?>
-                </div>
-
-            </div>
-        </div>
-
-        <?php
-}
-
 // ============================================
 // FORÇAR DESABILITAÇÃO DE REGISTRO E COMENTÁRIOS
 // ============================================
@@ -1172,34 +1049,3 @@ function theme_disable_comments()
     add_filter('comments_array', '__return_empty_array', 10, 2);
 }
 add_action('admin_init', 'theme_disable_comments');
-
-// ============================================
-// SECURITY HEADERS
-// ============================================
-
-/**
- * ✅ Adicionar security headers básicos
- *
- * Headers implementados:
- * - X-Content-Type-Options: Previne MIME-sniffing attacks
- * - X-Frame-Options: Previne clickjacking
- * - X-XSS-Protection: Ativa filtro XSS do navegador
- * - Referrer-Policy: Controla informações de referrer
- */
-function theme_add_security_headers()
-{
-    // Prevenir MIME-type sniffing
-    header("X-Content-Type-Options: nosniff");
-
-    // Prevenir clickjacking (permite embed apenas do próprio domínio)
-    header("X-Frame-Options: SAMEORIGIN");
-
-    // Ativar XSS filter do browser (legacy, mas compatível)
-    header("X-XSS-Protection: 1; mode=block");
-
-    // Controlar referrer em links externos
-    header("Referrer-Policy: strict-origin-when-cross-origin");
-
-    // TODO: Adicionar Content-Security-Policy quando definir estratégia de Analytics/Monetização
-}
-add_action('send_headers', 'theme_add_security_headers');
