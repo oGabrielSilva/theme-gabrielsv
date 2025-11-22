@@ -15,8 +15,8 @@ if ($post && $post->post_name === 'politica-de-cookies') {
 }
 ?>
 
-<div id="cookie-banner" class="is-fixed"
-    style="background-color: rgba(0,0,0,0.75); z-index: 9998; display: none; bottom: 0; left: 0; right: 0;" role="banner">
+<div id="cookie-banner"
+    style="position: fixed; background-color: rgba(0,0,0,0.75); z-index: 9998; display: none; bottom: 0; left: 0; right: 0;" role="banner">
 
     <div class="container py-3">
         <div class="columns is-variable is-3 is-vcentered is-mobile">

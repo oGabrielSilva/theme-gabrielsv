@@ -4,18 +4,20 @@
     <header class="mb-6">
         <div class="columns is-variable is-4 mb-4">
             <div class="column is-narrow is-flex is-justify-content-center">
-                <?php echo get_avatar(get_the_author_meta('ID'), 120, '', get_the_author(), array('class' => 'is-rounded')); ?>
+                <figure class="image is-128x128">
+                    <?php echo get_avatar(get_the_author_meta('ID'), 120, '', get_the_author(), array('class' => 'is-rounded')); ?>
+                </figure>
             </div>
             <div class="column">
                 <h1 class="title is-3 has-text-weight-bold mb-3">
                     <?php the_author(); ?>
                 </h1>
                 <?php if (get_the_author_meta('description')): ?>
-                    <p class="has-text-grey mb-3">
+                    <p class="mb-3">
                         <?php echo get_the_author_meta('description'); ?>
                     </p>
                 <?php endif; ?>
-                <div class="has-text-grey is-size-7 mb-3">
+                <div class="is-size-7 mb-3">
                     <?php
                     $post_count = count_user_posts(get_the_author_meta('ID'));
                     printf(_n('%s post publicado', '%s posts publicados', $post_count), number_format_i18n($post_count));
@@ -92,7 +94,7 @@
     <?php else: ?>
         <div class="has-text-centered py-6">
             <h2 class="title is-4 has-text-weight-bold mb-3">Nenhum post publicado ainda</h2>
-            <p class="has-text-grey">Este autor ainda não publicou nenhum conteúdo.</p>
+            <p class="">Este autor ainda não publicou nenhum conteúdo.</p>
             <a href="<?php echo home_url('/'); ?>" class="button is-primary mt-3">Voltar ao Início</a>
         </div>
     <?php endif; ?>

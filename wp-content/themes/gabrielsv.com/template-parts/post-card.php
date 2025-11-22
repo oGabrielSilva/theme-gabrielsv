@@ -19,12 +19,12 @@
         </div>
 
         <h2 class="title is-6 has-text-weight-bold mb-2">
-            <a href="<?php the_permalink(); ?>" class="has-text-dark" style="text-decoration: none;">
+            <a href="<?php the_permalink(); ?>" class="has-text-current" style="text-decoration: none;">
                 <?php the_title(); ?>
             </a>
         </h2>
 
-        <p class="has-text-grey is-size-7 mb-3">
+        <p class=" is-size-7 mb-3">
             <?php echo theme_get_limited_excerpt(get_the_ID(), 15); ?>
         </p>
 

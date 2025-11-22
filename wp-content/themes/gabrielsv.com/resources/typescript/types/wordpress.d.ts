@@ -28,9 +28,6 @@ declare global {
   const profileData: ProfileData;
   const commentsData: CommentsData;
 
-  // Bootstrap types
-  const bootstrap: typeof import('bootstrap');
-
   // Theme Manager
   interface Window {
     themeManager?: import('../main/ThemeManager').ThemeManager;

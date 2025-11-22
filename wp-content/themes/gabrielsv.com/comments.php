@@ -47,7 +47,7 @@ if (post_password_required()) {
             comment_form(array(
                 'title_reply' => 'Deixe um comentário',
                 'title_reply_before' => '<h3 class="title is-5 has-text-weight-bold mb-2">',
-                'title_reply_after' => '</h3><p class="has-text-grey mb-3">' . sprintf('O que você está pensando, %s?', esc_html($user_first_name)) . '</p>',
+                'title_reply_after' => '</h3><p class="mb-3">' . sprintf('O que você está pensando, %s?', esc_html($user_first_name)) . '</p>',
                 'title_reply_to' => 'Responder para %s',
                 'cancel_reply_link' => 'Cancelar',
                 'label_submit' => 'Comentar',
@@ -65,9 +65,10 @@ if (post_password_required()) {
             ));
         else:
             ?>
-            <div class="notification is-light mt-4">
+            <div class="notification mt-4">
                 <p class="mb-0">
-                    Você precisa estar <a href="<?php echo home_url('/auth?redirect_to=' . urlencode(get_permalink())); ?>" class="has-text-link">logado</a> para
+                    Você precisa estar <a href="<?php echo home_url('/auth?redirect_to=' . urlencode(get_permalink())); ?>"
+                        class="has-text-link">logado</a> para
                     comentar.
                 </p>
             </div>
@@ -84,12 +85,15 @@ if (post_password_required()) {
                 <p class="modal-card-title">Login Necessário</p>
                 <button class="delete" aria-label="close" data-modal-close="loginRequiredModal"></button>
             </header>
-            <section class="modal-card-body has-text-centered py-4">
-                <p class="mb-4">Você precisa estar logado para responder comentários.</p>
-                <a href="<?php echo home_url('/auth?redirect_to=' . urlencode(get_permalink())); ?>" class="button is-primary">
+            <section class="modal-card-body has-text-centered">
+                <p class="mb-0">Você precisa estar logado para responder comentários.</p>
+            </section>
+            <footer class="modal-card-foot is-justify-content-center">
+                <a href="<?php echo home_url('/auth?redirect_to=' . urlencode(get_permalink())); ?>"
+                    class="button is-primary">
                     Fazer Login
                 </a>
-            </section>
+            </footer>
         </div>
     </div>
 
@@ -103,15 +107,23 @@ if (post_password_required()) {
             </header>
             <section class="modal-card-body">
                 <?php // Comentário Original ?>
-                <div class="box has-background-light mb-3">
-                    <div class="is-flex is-align-items-start mb-2" style="gap: 0.5rem;">
-                        <img id="replyAuthorAvatar" src="" alt="" class="is-rounded" width="40" height="40">
-                        <div>
-                            <strong id="replyAuthorName" class="is-block"></strong>
-                            <small class="has-text-grey" id="replyCommentDate"></small>
+                <div class="card mb-3">
+                    <div class="card-content">
+                        <div class="media">
+                            <div class="media-left">
+                                <figure class="image is-48x48">
+                                    <img id="replyAuthorAvatar" src="" alt="" class="is-rounded">
+                                </figure>
+                            </div>
+                            <div class="media-content">
+                                <p class="title is-6 mb-1" id="replyAuthorName"></p>
+                                <p class="subtitle is-7" id="replyCommentDate"></p>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <p id="replyCommentContent" class="is-size-7 mb-0"></p>
                         </div>
                     </div>
-                    <div id="replyCommentContent" class="is-size-7 has-text-grey"></div>
                 </div>
 
                 <?php // Formulário de Resposta ?>
@@ -128,11 +140,14 @@ if (post_password_required()) {
                 <p class="modal-card-title">Deletar comentário?</p>
                 <button class="delete" aria-label="close" data-modal-close="deleteCommentModal"></button>
             </header>
-            <section class="modal-card-body has-text-centered pb-4">
-                <p class="has-text-grey mb-4">Esta ação não pode ser desfeita.</p>
-                <button type="button" class="button is-light mr-2" data-modal-close="deleteCommentModal">Cancelar</button>
-                <button type="button" class="button is-danger" id="confirmDeleteCommentBtn">Deletar</button>
+            <section class="modal-card-body has-text-centered">
+                <p class=" mb-0">Esta ação não pode ser desfeita.</p>
             </section>
+            <footer class="modal-card-foot is-justify-content-center">
+                <button type="button" class="button is-light mr-2"
+                    data-modal-close="deleteCommentModal">Cancelar</button>
+                <button type="button" class="button is-danger" id="confirmDeleteCommentBtn">Deletar</button>
+            </footer>
         </div>
     </div>
 

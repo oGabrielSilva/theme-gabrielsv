@@ -51,6 +51,36 @@ get_header();
                         <?php // Formulário de Redefinição de Senha ?>
                         <h1 class="title is-3 has-text-weight-bold mb-4 has-text-centered">Nova senha</h1>
 
+                        <?php
+                        // SEGURANÇA FRONTEND: Verificar se usuário logado está tentando usar link de outro usuário
+                        $can_reset_password = true; // Por padrão, permitir
+
+                        if (is_user_logged_in()) {
+                            $current_user_id = get_current_user_id();
+                            $reset_user_id = $reset_user->ID;
+
+                            if ($current_user_id != $reset_user_id) {
+                                // Link pertence a outro usuário - bloquear reset
+                                $can_reset_password = false;
+                                ?>
+                                <div class="notification is-danger mb-4" role="alert">
+                                    <strong>Atenção!</strong> Este link de recuperação pertence a outro usuário.
+                                    Por favor, <a href="<?php echo wp_logout_url(home_url('/auth')); ?>"
+                                        class="has-text-weight-bold">faça logout primeiro</a>
+                                    antes de continuar.
+                                </div>
+                                <?php
+                            } else {
+                                // Link pertence ao usuário logado - apenas informativo
+                                ?>
+                                <div class="notification is-info is-light mb-4" role="alert">
+                                    Você já está logado. Este é o seu link de recuperação de senha.
+                                </div>
+                                <?php
+                            }
+                        }
+                        ?>
+
                         <form id="reset-password-form" method="post" novalidate>
                             <input type="hidden" name="reset_key" value="<?php echo esc_attr($_GET['key']); ?>">
                             <input type="hidden" name="reset_login" value="<?php echo esc_attr($_GET['login']); ?>">
@@ -58,13 +88,9 @@ get_header();
                             <div class="field mb-3">
                                 <label class="label" for="reset-password">Nova senha</label>
                                 <div class="control">
-                                    <input type="password"
-                                           class="input"
-                                           id="reset-password"
-                                           name="password"
-                                           required
-                                           minlength="8"
-                                           autocomplete="new-password">
+                                    <input type="password" class="input" id="reset-password" name="password" required
+                                        minlength="8" autocomplete="new-password"
+                                        <?php echo !$can_reset_password ? 'disabled' : ''; ?>>
                                 </div>
                                 <p class="help">Mínimo de 8 caracteres</p>
                                 <p class="help is-danger is-hidden">
@@ -75,19 +101,17 @@ get_header();
                             <div class="field mb-3">
                                 <label class="label" for="reset-password-confirm">Confirmar nova senha</label>
                                 <div class="control">
-                                    <input type="password"
-                                           class="input"
-                                           id="reset-password-confirm"
-                                           name="password_confirm"
-                                           required
-                                           autocomplete="new-password">
+                                    <input type="password" class="input" id="reset-password-confirm" name="password_confirm"
+                                        required autocomplete="new-password"
+                                        <?php echo !$can_reset_password ? 'disabled' : ''; ?>>
                                 </div>
                                 <p class="help is-danger is-hidden">
                                     As senhas não coincidem.
                                 </p>
                             </div>
 
-                            <button type="submit" class="button is-primary is-fullwidth" id="reset-password-submit">
+                            <button type="submit" class="button is-primary is-fullwidth" id="reset-password-submit"
+                                <?php echo !$can_reset_password ? 'disabled' : ''; ?>>
                                 Redefinir senha
                             </button>
                         </form>
@@ -109,64 +133,56 @@ get_header();
                         <div id="auth-error" class="notification is-danger is-hidden" role="alert"></div>
 
                         <?php // Formulário de Login ?>
-                    <form id="auth-form" method="post" novalidate>
-                        <div class="field mb-3">
-                            <label class="label" for="auth-username">E-mail ou usuário</label>
-                            <div class="control">
-                                <input type="text"
-                                       class="input"
-                                       id="auth-username"
-                                       name="username"
-                                       required
-                                       autocomplete="username"
-                                       autofocus>
+                        <form id="auth-form" method="post" novalidate>
+                            <div class="field mb-3">
+                                <label class="label" for="auth-username">E-mail ou usuário</label>
+                                <div class="control">
+                                    <input type="text" class="input" id="auth-username" name="username" required
+                                        autocomplete="username" autofocus>
+                                </div>
+                                <p class="help is-danger is-hidden">
+                                    Por favor, informe seu e-mail ou usuário.
+                                </p>
                             </div>
-                            <p class="help is-danger is-hidden">
-                                Por favor, informe seu e-mail ou usuário.
-                            </p>
-                        </div>
 
-                        <div class="field mb-3">
-                            <label class="label" for="auth-password">Senha</label>
-                            <div class="control">
-                                <input type="password"
-                                       class="input"
-                                       id="auth-password"
-                                       name="password"
-                                       required
-                                       autocomplete="current-password">
+                            <div class="field mb-3">
+                                <label class="label" for="auth-password">Senha</label>
+                                <div class="control">
+                                    <input type="password" class="input" id="auth-password" name="password" required
+                                        autocomplete="current-password">
+                                </div>
+                                <p class="help is-danger is-hidden">
+                                    Por favor, informe sua senha.
+                                </p>
                             </div>
-                            <p class="help is-danger is-hidden">
-                                Por favor, informe sua senha.
-                            </p>
-                        </div>
 
-                        <div class="field mb-3">
-                            <label class="checkbox">
-                                <input type="checkbox"
-                                       id="auth-remember"
-                                       name="remember">
-                                Lembrar de mim
-                            </label>
-                        </div>
+                            <div class="field mb-3">
+                                <label class="checkbox">
+                                    <input type="checkbox" id="auth-remember" name="remember">
+                                    Lembrar de mim
+                                </label>
+                            </div>
 
-                        <button type="submit" class="button is-primary is-fullwidth mb-3" id="auth-submit">
-                            Entrar
-                        </button>
-
-                        <div class="has-text-centered">
-                            <button type="button" class="button is-text is-small p-0" data-modal-open="forgotPasswordModal">
-                                Esqueceu a senha?
+                            <button type="submit" class="button is-primary is-fullwidth mb-3" id="auth-submit">
+                                Entrar
                             </button>
-                        </div>
 
-                        <div class="has-text-centered mt-3">
-                            <span class="has-text-grey is-size-7">Não tem uma conta?</span>
-                            <button type="button" class="button is-text is-small p-0 ml-1" data-modal-open="registerModal">
-                                Criar conta
-                            </button>
-                        </div>
-                    </form>
+                            <div class="has-text-centered">
+                                <button type="button" class="button is-text is-small p-0"
+                                    data-modal-open="forgotPasswordModal">
+                                    Esqueceu a senha?
+                                </button>
+                            </div>
+
+                            <div class="has-text-centered mt-3 is-flex is-align-items-center is-justify-content-center"
+                                style="gap: 0.4rem">
+                                <span class="is-size-7">Não tem uma conta?</span>
+                                <button type="button" class="button is-text is-small p-0 m-0"
+                                    data-modal-open="registerModal">
+                                    Criar conta
+                                </button>
+                            </div>
+                        </form>
                     <?php endif; ?>
                 </div>
             </div>
@@ -182,22 +198,16 @@ get_header();
             <p class="modal-card-title">Criar conta</p>
             <button class="delete" aria-label="close" data-modal-close="registerModal"></button>
         </header>
-        <section class="modal-card-body">
-            <div id="register-error" class="notification is-danger is-hidden" role="alert"></div>
-            <div id="register-success" class="notification is-success is-hidden" role="alert"></div>
+        <form id="register-form" method="post" novalidate>
+            <section class="modal-card-body">
+                <div id="register-error" class="notification is-danger is-hidden" role="alert"></div>
+                <div id="register-success" class="notification is-success is-hidden" role="alert"></div>
 
-            <form id="register-form" method="post" novalidate>
                 <div class="field mb-3">
                     <label class="label" for="register-username">Nome de usuário</label>
                     <div class="control">
-                        <input type="text"
-                               class="input"
-                               id="register-username"
-                               name="username"
-                               required
-                               pattern="[a-z0-9_-]{3,20}"
-                               autocomplete="username"
-                               placeholder="exemplo_123">
+                        <input type="text" class="input" id="register-username" name="username" required
+                            pattern="[a-z0-9_-]{3,20}" autocomplete="username" placeholder="exemplo_123">
                     </div>
                     <p class="help">3-20 caracteres (minúsculas, números, _ e -). Formatado automaticamente.</p>
                     <p class="help is-danger is-hidden">
@@ -208,12 +218,8 @@ get_header();
                 <div class="field mb-3">
                     <label class="label" for="register-email">E-mail</label>
                     <div class="control">
-                        <input type="email"
-                               class="input"
-                               id="register-email"
-                               name="email"
-                               required
-                               autocomplete="email">
+                        <input type="email" class="input" id="register-email" name="email" required
+                            autocomplete="email">
                     </div>
                     <p class="help is-danger is-hidden">
                         Por favor, informe um e-mail válido.
@@ -223,13 +229,8 @@ get_header();
                 <div class="field mb-3">
                     <label class="label" for="register-password">Senha</label>
                     <div class="control">
-                        <input type="password"
-                               class="input"
-                               id="register-password"
-                               name="password"
-                               required
-                               minlength="8"
-                               autocomplete="new-password">
+                        <input type="password" class="input" id="register-password" name="password" required
+                            minlength="8" autocomplete="new-password">
                     </div>
                     <p class="help">Mínimo de 8 caracteres</p>
                     <p class="help is-danger is-hidden">
@@ -240,23 +241,20 @@ get_header();
                 <div class="field mb-3">
                     <label class="label" for="register-password-confirm">Confirmar senha</label>
                     <div class="control">
-                        <input type="password"
-                               class="input"
-                               id="register-password-confirm"
-                               name="password_confirm"
-                               required
-                               autocomplete="new-password">
+                        <input type="password" class="input" id="register-password-confirm" name="password_confirm"
+                            required autocomplete="new-password">
                     </div>
                     <p class="help is-danger is-hidden">
                         As senhas não coincidem.
                     </p>
                 </div>
-
+            </section>
+            <footer class="modal-card-foot">
                 <button type="submit" class="button is-primary is-fullwidth" id="register-submit">
                     Criar conta
                 </button>
-            </form>
-        </section>
+            </footer>
+        </form>
     </div>
 </div>
 
@@ -268,30 +266,28 @@ get_header();
             <p class="modal-card-title">Recuperar senha</p>
             <button class="delete" aria-label="close" data-modal-close="forgotPasswordModal"></button>
         </header>
-        <section class="modal-card-body">
-            <p class="has-text-grey is-size-7 mb-3">Digite seu e-mail para receber um link de recuperação de senha.</p>
+        <form id="forgot-password-form" method="post" novalidate>
+            <section class="modal-card-body">
+                <p class="is-size-7 mb-3">Digite seu e-mail para receber um link de recuperação de senha.
+                </p>
 
-            <form id="forgot-password-form" method="post" novalidate>
                 <div class="field mb-3">
                     <label class="label" for="forgot-password-email">E-mail</label>
                     <div class="control">
-                        <input type="email"
-                               class="input"
-                               id="forgot-password-email"
-                               name="email"
-                               required
-                               autocomplete="email">
+                        <input type="email" class="input" id="forgot-password-email" name="email" required
+                            autocomplete="email">
                     </div>
                     <p class="help is-danger is-hidden">
                         Por favor, informe um e-mail válido.
                     </p>
                 </div>
-
+            </section>
+            <footer class="modal-card-foot">
                 <button type="submit" class="button is-primary is-fullwidth" id="forgot-password-submit">
                     Enviar link de recuperação
                 </button>
-            </form>
-        </section>
+            </footer>
+        </form>
     </div>
 </div>
 

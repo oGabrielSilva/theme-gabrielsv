@@ -47,17 +47,17 @@ export class ReplyComment {
     const commentAvatar = replyBtn.getAttribute('data-comment-avatar');
     const commentDate = replyBtn.getAttribute('data-comment-date');
     const commentContent = replyBtn.getAttribute('data-comment-content');
-    const href = replyBtn.getAttribute('href');
 
-    if (!href || !commentAuthor || !commentAvatar || !commentDate || !commentContent) {
+    if (!commentAuthor || !commentAvatar || !commentDate || !commentContent) {
       return;
     }
 
-    // Extrair o comment_parent da URL
-    const url = new URL(href, window.location.origin);
-    const replyToId = url.searchParams.get('replytocom');
+    // Extrair o comment_parent do atributo data-comment-id
+    const replyToId = replyBtn.getAttribute('data-comment-id');
 
-    if (!replyToId) return;
+    if (!replyToId) {
+      return;
+    }
 
     // Atualizar conteúdo do modal
     this.updateModalContent(commentAuthor, commentAvatar, commentDate, commentContent, replyToId);

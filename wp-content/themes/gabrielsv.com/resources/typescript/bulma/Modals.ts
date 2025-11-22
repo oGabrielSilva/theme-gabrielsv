@@ -3,11 +3,11 @@
  * Suporta abertura via data-attribute, fechamento com ESC e click no background
  */
 export function initBulmaModals(): void {
-  // Abrir modals via data-modal-target
-  document.querySelectorAll<HTMLElement>('[data-modal-target]').forEach((trigger) => {
+  // Abrir modals via data-modal-target ou data-modal-open
+  document.querySelectorAll<HTMLElement>('[data-modal-target], [data-modal-open]').forEach((trigger) => {
     trigger.addEventListener('click', (e) => {
       e.preventDefault();
-      const targetId = trigger.getAttribute('data-modal-target');
+      const targetId = trigger.getAttribute('data-modal-target') || trigger.getAttribute('data-modal-open');
       if (!targetId) return;
 
       const modal = document.getElementById(targetId);
@@ -38,19 +38,56 @@ export function initBulmaModals(): void {
 }
 
 /**
- * Abre um modal específico
+ * Abre um modal específico com animação de fade-in no fundo e slide-in no card
  */
 export function openModal(modal: HTMLElement): void {
-  modal.classList.add('is-active');
-  document.documentElement.classList.add('is-clipped'); // Prevenir scroll do body
+  const modalCard = modal.querySelector<HTMLElement>('.modal-card, .modal-content');
+
+  // Resetar classes de animação de saída
+  modal.classList.remove('has-fade-out');
+  if (modalCard) {
+    modalCard.classList.remove('has-slide-out-up');
+  }
+
+  // Adicionar classes de animação de entrada
+  modal.classList.add('is-active', 'has-fade-in');
+  if (modalCard) {
+    modalCard.classList.add('has-slide-in-down');
+  }
+
+  document.documentElement.classList.add('is-clipped');
 }
 
 /**
- * Fecha um modal específico
+ * Fecha um modal específico com animação de fade-out no fundo e slide-out no card
  */
 export function closeModal(modal: HTMLElement): void {
-  modal.classList.remove('is-active');
-  document.documentElement.classList.remove('is-clipped');
+  const modalCard = modal.querySelector<HTMLElement>('.modal-card, .modal-content');
+
+  // Resetar classes de animação de entrada
+  modal.classList.remove('has-fade-in');
+  if (modalCard) {
+    modalCard.classList.remove('has-slide-in-down');
+  }
+
+  // Adicionar classes de animação de saída
+  modal.classList.add('has-fade-out');
+  if (modalCard) {
+    modalCard.classList.add('has-slide-out-up');
+  }
+
+  setTimeout(() => {
+    // Limpar todas as classes após a animação
+    modal.classList.remove('is-active', 'has-fade-out');
+    if (modalCard) {
+      modalCard.classList.remove('has-slide-out-up');
+    }
+
+    // Apenas remover 'is-clipped' se não houver outros modais ativos
+    if (document.querySelectorAll('.modal.is-active').length === 0) {
+      document.documentElement.classList.remove('is-clipped');
+    }
+  }, 300); // Duração da animação
 }
 
 /**

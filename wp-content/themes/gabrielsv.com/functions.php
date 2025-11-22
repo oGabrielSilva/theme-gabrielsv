@@ -454,6 +454,16 @@ function theme_ajax_password_reset_confirm()
         }
     }
 
+    // SEGURANÇA: Se usuário está logado, verificar se o token pertence a ele
+    if (is_user_logged_in()) {
+        $current_user_id = get_current_user_id();
+        if ($current_user_id != $user->ID) {
+            wp_send_json_error(array(
+                'message' => 'Este link de recuperação pertence a outro usuário. Faça logout primeiro.',
+            ));
+        }
+    }
+
     // Redefinir senha (já invalida o token automaticamente)
     reset_password($user, $password);
 
@@ -531,6 +541,73 @@ function theme_ajax_delete_comment()
     }
 }
 add_action('wp_ajax_delete_user_comment', 'theme_ajax_delete_comment');
+
+/**
+ * AJAX: Submeter comentário
+ */
+function theme_ajax_submit_comment()
+{
+    // Verificar nonce
+    check_ajax_referer('comment_nonce', 'nonce');
+
+    // Verificar se usuário está logado
+    if (!is_user_logged_in()) {
+        wp_send_json_error(array('message' => 'Você precisa estar logado para comentar.'), 401);
+    }
+
+    // Validar campos obrigatórios
+    $comment_post_ID = isset($_POST['comment_post_ID']) ? intval($_POST['comment_post_ID']) : 0;
+    $comment_content = isset($_POST['comment']) ? trim($_POST['comment']) : '';
+    $comment_parent = isset($_POST['comment_parent']) ? intval($_POST['comment_parent']) : 0;
+
+    if (empty($comment_content)) {
+        wp_send_json_error(array('message' => 'O comentário não pode estar vazio.'), 400);
+    }
+
+    if (!$comment_post_ID || !get_post($comment_post_ID)) {
+        wp_send_json_error(array('message' => 'Post inválido.'), 400);
+    }
+
+    // Verificar se comentários estão abertos
+    if (!comments_open($comment_post_ID)) {
+        wp_send_json_error(array('message' => 'Os comentários estão fechados para este post.'), 403);
+    }
+
+    // Se for resposta, verificar se comentário pai existe
+    if ($comment_parent > 0) {
+        $parent_comment = get_comment($comment_parent);
+        if (!$parent_comment || $parent_comment->comment_post_ID != $comment_post_ID) {
+            wp_send_json_error(array('message' => 'Comentário pai inválido.'), 400);
+        }
+    }
+
+    // Preparar dados do comentário
+    $current_user = wp_get_current_user();
+    $commentdata = array(
+        'comment_post_ID' => $comment_post_ID,
+        'comment_content' => $comment_content,
+        'comment_parent' => $comment_parent,
+        'user_id' => $current_user->ID,
+        'comment_author' => $current_user->display_name,
+        'comment_author_email' => $current_user->user_email,
+        'comment_approved' => 1, // Auto-aprovar comentários de usuários logados
+    );
+
+    // Inserir comentário
+    $comment_id = wp_new_comment($commentdata, true);
+
+    if (is_wp_error($comment_id)) {
+        wp_send_json_error(array('message' => 'Erro ao criar comentário: ' . $comment_id->get_error_message()), 500);
+    }
+
+    // Retornar sucesso
+    wp_send_json_success(array(
+        'message' => 'Comentário publicado com sucesso!',
+        'comment_id' => $comment_id,
+        'reload' => true
+    ));
+}
+add_action('wp_ajax_submit_comment', 'theme_ajax_submit_comment');
 
 function theme_styles()
 {
@@ -976,94 +1053,72 @@ add_action('comment_post', 'theme_notify_comment_reply', 10, 2);
 function theme_comment_template($comment, $args, $depth)
 {
     $tag = ('div' === $args['style']) ? 'div' : 'li';
+
+    // Lógica PHP fica separada no topo
+    $is_post_author = ($comment->user_id == get_the_author_meta('ID'));
+    $avatar_size = 32; // Tamanho reduzido para economizar espaço
+
+    // Prepara link de resposta para não poluir o HTML abaixo
+    $reply_args = array_merge($args, array(
+        'depth' => $depth,
+        'max_depth' => $args['max_depth'],
+        'reply_text' => 'Responder',
+        'add_below' => 'comment',
+    ));
     ?>
-    <<?php echo $tag; ?> id="comment-<?php comment_ID(); ?>" <?php comment_class('comment mb-4', $comment); ?> >
-        <article class="comment-body card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex gap-3 mb-3">
-                    <div class="flex-shrink-0">
-                        <?php echo get_avatar($comment, $args['avatar_size'], '', '', array('class' => 'rounded-circle', 'loading' => 'lazy')); ?>
-                    </div>
-                    <div class="flex-grow-1">
-                        <div class="comment-meta mb-2">
-                            <strong class="comment-author">
-                                <?php
-                                // Link para página do autor (apenas se tiver role de Author+)
-                                $comment_author_id = $comment->user_id;
-                                if ($comment_author_id && theme_user_has_author_page($comment_author_id)) {
-                                    printf(
-                                        '<a href="%s" class="text-decoration-none">%s</a>',
-                                        esc_url(get_author_posts_url($comment_author_id)),
-                                        esc_html(get_comment_author($comment))
-                                    );
-                                } else {
-                                    echo esc_html(get_comment_author($comment));
-                                }
-                                ?>
-                            </strong>
-                            <div class="small text-muted">
-                                <time datetime="<?php comment_time('c'); ?>">
-                                    <?php printf('%s às %s', get_comment_date('d/m/Y'), get_comment_time('H:i')); ?>
-                                </time>
-                                <?php if ('0' === $comment->comment_approved): ?>
-                                    <span class="badge bg-warning text-dark ms-2">Aguardando moderação</span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
 
-                        <div class="comment-content">
-                            <?php comment_text(); ?>
-                        </div>
+    <<?php echo $tag; ?> id="comment-<?php comment_ID(); ?>" <?php comment_class('compact-comment mb-1', $comment); ?>>
 
-                        <?php
-                        $reply_link = get_comment_reply_link(array_merge($args, array(
-                            'depth' => $depth,
-                            'max_depth' => $args['max_depth'],
-                            'reply_text' => 'Responder',
-                            'add_below' => 'comment'
-                        )));
+        <div class="media mb-0 pt-2 pb-2" style="border: none;">
 
-                        if ($reply_link):
-                            // Adicionar dados do comentário para o modal
-                            $comment_avatar = get_avatar_url($comment, array('size' => 40));
-                            $comment_date = get_comment_date('d/m/Y \à\s H:i', $comment->comment_ID);
-                            $comment_content = wp_trim_words(get_comment_text($comment->comment_ID), 50, '...');
-
-                            // Se usuário não está logado, mudar comportamento do botão
-                            if (!is_user_logged_in()) {
-                                $reply_link = str_replace(
-                                    'class="comment-reply-link"',
-                                    'class="comment-reply-link text-decoration-none small" data-bs-toggle="modal" data-bs-target="#loginRequiredModal"',
-                                    $reply_link
-                                );
-                                // Remover href para não scroll
-                                $reply_link = preg_replace('/href="[^"]*"/', 'href="#"', $reply_link);
-                            } else {
-                                $reply_link = str_replace(
-                                    'class="comment-reply-link"',
-                                    'class="comment-reply-link text-decoration-none small" ' .
-                                    'data-comment-id="' . get_comment_ID() . '" ' .
-                                    'data-comment-author="' . esc_attr(get_comment_author()) . '" ' .
-                                    'data-comment-avatar="' . esc_url($comment_avatar) . '" ' .
-                                    'data-comment-date="' . esc_attr($comment_date) . '" ' .
-                                    'data-comment-content="' . esc_attr($comment_content) . '"',
-                                    $reply_link
-                                );
-                            }
-                            echo '<div class="reply mt-2">' . $reply_link;
-
-                            // Botão de deletar (apenas para o autor do comentário)
-                            if (is_user_logged_in() && $comment->user_id === get_current_user_id()) {
-                                echo ' <span class="text-muted">•</span> ';
-                                echo '<button type="button" class="btn btn-link btn-sm text-danger text-decoration-none p-0 delete-comment-btn" data-comment-id="' . get_comment_ID() . '">Deletar</button>';
-                            }
-
-                            echo '</div>';
-                        endif;
-                        ?>
-                    </div>
-                </div>
+            <div class="media-left mr-2">
+                <figure class="image is-32x32">
+                    <?php echo get_avatar($comment, $avatar_size, '', '', array('class' => 'is-rounded')); ?>
+                </figure>
             </div>
-        </article>
+
+            <div class="media-content">
+
+                <div class="content is-size-7 mb-1">
+                    <strong><?php echo get_comment_author_link($comment); ?></strong>
+
+                    <?php if ($is_post_author): ?>
+                        <span class="tag is-primary is-rounded ml-1"
+                            style="font-size: 0.6rem; height: 1.5em; padding: 0 0.5em;">Autor</span>
+                    <?php endif; ?>
+
+                    <span style="opacity: 0.6;" class="mx-1">•</span>
+
+                    <time style="opacity: 0.7;" datetime="<?php comment_time('c'); ?>">
+                        <?php printf('%s', get_comment_date()); ?>
+                    </time>
+                </div>
+
+                <div class="content is-size-6 mb-1 text-break">
+                    <?php if ('0' === $comment->comment_approved): ?>
+                        <p class="is-size-7" style="font-style: italic; opacity: 0.8;">Aguardando moderação.</p>
+                    <?php endif; ?>
+
+                    <?php comment_text(); ?>
+                </div>
+
+                <div class="is-size-7">
+                    <?php
+                    // O WP retorna o link como string, então apenas imprimimos o resultado
+                    comment_reply_link($reply_args);
+                    ?>
+
+                    <?php if (is_user_logged_in() && $comment->user_id === get_current_user_id()): ?>
+                        <span style="opacity: 0.5;" class="mx-1">|</span>
+                        <button type="button" class="button-reset delete-comment-btn" data-comment-id="<?php comment_ID(); ?>"
+                            style="border:none; background:none; padding:0; color: inherit; cursor: pointer; font-size: inherit; opacity: 0.8;">
+                            Excluir
+                        </button>
+                    <?php endif; ?>
+                </div>
+
+            </div>
+        </div>
+
         <?php
 }

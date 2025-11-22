@@ -1,6 +1,8 @@
 <?php get_header(); ?>
 
 <main class="container my-6">
+
+
     <?php
     $latest_posts = new WP_Query(array(
         'posts_per_page' => 1,
@@ -31,13 +33,13 @@
                                 </a>
                             </h1>
 
-                            <p class="has-text-grey mb-3">
+                            <p class="mb-3">
                                 <?php echo theme_get_limited_excerpt(get_the_ID(), 20); ?>
                             </p>
 
                             <div class="is-flex is-justify-content-space-between is-align-items-center">
                                 <?php get_template_part('template-parts/post-meta'); ?>
-                                <a href="<?php the_permalink(); ?>" class="button is-small is-primary">
+                                <a href="<?php the_permalink(); ?>" class="button is-small">
                                     Ler
                                 </a>
                             </div>
@@ -69,7 +71,8 @@
                             <?php if (has_post_thumbnail()): ?>
                                 <div class="card-image">
                                     <figure class="image">
-                                        <a href="<?php the_permalink(); ?>" aria-label="Ir para o artigo: <?php the_title_attribute(); ?>">
+                                        <a href="<?php the_permalink(); ?>"
+                                            aria-label="Ir para o artigo: <?php the_title_attribute(); ?>">
                                             <?php the_post_thumbnail('blog-card', array('style' => 'height: 200px; object-fit: cover;', 'alt' => get_the_title())); ?>
                                         </a>
                                     </figure>
@@ -87,14 +90,15 @@
                                     </a>
                                 </h3>
 
-                                <p class="content has-text-grey is-size-7 mb-3">
+                                <p class="content is-size-7 mb-3">
                                     <?php echo theme_get_limited_excerpt(get_the_ID(), 15); ?>
                                 </p>
 
                                 <div class="mt-auto">
                                     <div class="is-flex is-justify-content-space-between is-align-items-center">
                                         <?php get_template_part('template-parts/post-meta'); ?>
-                                        <a href="<?php the_permalink(); ?>" class="button is-small is-primary" style="position: relative; z-index: 2;">
+                                        <a href="<?php the_permalink(); ?>" class="button is-small"
+                                            style="position: relative; z-index: 2;">
                                             Ler
                                         </a>
                                     </div>
@@ -131,9 +135,11 @@
                 ?>
                 <section class="mb-6 pb-4">
                     <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-                        <h2 class="title is-5 has-text-weight-bold m-0"><?php echo esc_html($category_name); ?></h2>
-                        <a href="<?php echo esc_url(get_category_link($category->term_id)); ?>" class="is-size-7" style="text-decoration: none;">
-                            Ver tudo →
+                        <h2 class="has-text-grey is-5 has-text-weight-bold m-0 is-family-monospace">
+                            <?php echo esc_html($category_name); ?>
+                        </h2>
+                        <a href="<?php echo esc_url(get_category_link($category->term_id)); ?>" class="button is-ghost is-small">
+                            Ver tudo
                         </a>
                     </div>
 
@@ -160,7 +166,7 @@
                                             </a>
                                         </h3>
 
-                                        <p class="content has-text-grey is-size-7 mb-2">
+                                        <p class="content is-size-7 mb-2">
                                             <?php echo theme_get_limited_excerpt(get_the_ID(), 12); ?>
                                         </p>
 
@@ -187,7 +193,7 @@
         ?>
         <section class="has-text-centered py-6">
             <h2 class="title is-4 has-text-weight-bold mb-3">Nenhum post publicado ainda</h2>
-            <p class="has-text-grey">Em breve, novos conteúdos sobre tecnologia estarão disponíveis.</p>
+            <p>Em breve, novos conteúdos sobre tecnologia estarão disponíveis.</p>
         </section>
     <?php endif;
     wp_reset_postdata(); ?>

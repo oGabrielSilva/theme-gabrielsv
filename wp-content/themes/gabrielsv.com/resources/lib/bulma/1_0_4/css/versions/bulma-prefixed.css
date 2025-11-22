@@ -19531,7 +19531,7 @@ bulma-has-background-danger.is-hoverable:active {
   background-color: hsl(221, 14%, 14%) !important;
 }
 
-.bulma-has-text-grey-darker {
+.bulma--darker {
   color: hsl(221, 14%, 21%) !important;
 }
 
@@ -19539,7 +19539,7 @@ bulma-has-background-danger.is-hoverable:active {
   background-color: hsl(221, 14%, 21%) !important;
 }
 
-.bulma-has-text-grey-dark {
+.bulma--dark {
   color: hsl(221, 14%, 29%) !important;
 }
 
@@ -19547,7 +19547,7 @@ bulma-has-background-danger.is-hoverable:active {
   background-color: hsl(221, 14%, 29%) !important;
 }
 
-.bulma-has-text-grey {
+.bulma- {
   color: hsl(221, 14%, 48%) !important;
 }
 
@@ -19555,7 +19555,7 @@ bulma-has-background-danger.is-hoverable:active {
   background-color: hsl(221, 14%, 48%) !important;
 }
 
-.bulma-has-text-grey-light {
+.bulma--light {
   color: hsl(221, 14%, 71%) !important;
 }
 
@@ -19563,7 +19563,7 @@ bulma-has-background-danger.is-hoverable:active {
   background-color: hsl(221, 14%, 71%) !important;
 }
 
-.bulma-has-text-grey-lighter {
+.bulma--lighter {
   color: hsl(221, 14%, 86%) !important;
 }
 

@@ -1,8 +1,7 @@
 <?php // Small Post Card ?>
 <article class="is-flex" style="gap: 0.75rem;">
     <?php if (has_post_thumbnail()): ?>
-        <a href="<?php the_permalink(); ?>" class="is-flex-shrink-0"
-           aria-label="<?php the_title_attribute(); ?>">
+        <a href="<?php the_permalink(); ?>" class="is-flex-shrink-0" aria-label="<?php the_title_attribute(); ?>">
             <figure class="image is-64x64">
                 <?php the_post_thumbnail('blog-thumb', array(
                     'class' => 'is-rounded',
@@ -18,7 +17,7 @@
                 <?php the_title(); ?>
             </a>
         </h3>
-        <div class="is-size-7 has-text-grey">
+        <div class="is-size-7 ">
             <time datetime="<?php echo get_the_date('c'); ?>">
                 <?php echo get_the_date('d M, Y'); ?>
             </time>

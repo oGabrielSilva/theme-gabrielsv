@@ -29,9 +29,12 @@ get_header();
                     <form id="profile-form" novalidate>
                         <?php // Avatar ?>
                         <div class="has-text-centered mb-4">
-                            <?php echo get_avatar($user_id, 96, '', '', array('class' => 'is-rounded')); ?>
-                            <p class="is-size-7 has-text-grey mt-2">
-                                O avatar é gerenciado pelo <a href="https://gravatar.com" target="_blank" rel="noopener">Gravatar</a>
+                            <figure class="image is-96x96 mx-auto">
+                                <?php echo get_avatar($user_id, 96, '', '', array('class' => 'is-rounded')); ?>
+                            </figure>
+                            <p class="is-size-7 mt-2">
+                                O avatar é gerenciado pelo <a href="https://gravatar.com" target="_blank"
+                                    rel="noopener">Gravatar</a>
                             </p>
                         </div>
 
@@ -39,12 +42,8 @@ get_header();
                         <div class="field mb-3">
                             <label class="label" for="profile-username">Nome de usuário</label>
                             <div class="control">
-                                <input type="text"
-                                       class="input"
-                                       id="profile-username"
-                                       value="<?php echo esc_attr($current_user->user_login); ?>"
-                                       readonly
-                                       disabled>
+                                <input type="text" class="input" id="profile-username"
+                                    value="<?php echo esc_attr($current_user->user_login); ?>" readonly disabled>
                             </div>
                             <p class="help">O nome de usuário não pode ser alterado.</p>
                         </div>
@@ -53,11 +52,8 @@ get_header();
                         <div class="field mb-3">
                             <label class="label" for="profile-first-name">Nome</label>
                             <div class="control">
-                                <input type="text"
-                                       class="input"
-                                       id="profile-first-name"
-                                       name="first_name"
-                                       value="<?php echo esc_attr($current_user->first_name); ?>">
+                                <input type="text" class="input" id="profile-first-name" name="first_name"
+                                    value="<?php echo esc_attr($current_user->first_name); ?>">
                             </div>
                         </div>
 
@@ -65,11 +61,8 @@ get_header();
                         <div class="field mb-3">
                             <label class="label" for="profile-last-name">Sobrenome</label>
                             <div class="control">
-                                <input type="text"
-                                       class="input"
-                                       id="profile-last-name"
-                                       name="last_name"
-                                       value="<?php echo esc_attr($current_user->last_name); ?>">
+                                <input type="text" class="input" id="profile-last-name" name="last_name"
+                                    value="<?php echo esc_attr($current_user->last_name); ?>">
                             </div>
                         </div>
 
@@ -77,12 +70,8 @@ get_header();
                         <div class="field mb-3">
                             <label class="label" for="profile-email">E-mail</label>
                             <div class="control">
-                                <input type="email"
-                                       class="input"
-                                       id="profile-email"
-                                       name="email"
-                                       value="<?php echo esc_attr($current_user->user_email); ?>"
-                                       required>
+                                <input type="email" class="input" id="profile-email" name="email"
+                                    value="<?php echo esc_attr($current_user->user_email); ?>" required>
                             </div>
                             <p class="help is-danger is-hidden">
                                 Por favor, informe um e-mail válido.
@@ -93,10 +82,8 @@ get_header();
                         <div class="field mb-3">
                             <label class="label" for="profile-bio">Biografia</label>
                             <div class="control">
-                                <textarea class="textarea"
-                                          id="profile-bio"
-                                          name="bio"
-                                          rows="4"><?php echo esc_textarea($current_user->description); ?></textarea>
+                                <textarea class="textarea" id="profile-bio" name="bio"
+                                    rows="4"><?php echo esc_textarea($current_user->description); ?></textarea>
                             </div>
                         </div>
 
@@ -104,12 +91,8 @@ get_header();
                         <div class="field mb-3">
                             <label class="label" for="profile-url">Site</label>
                             <div class="control">
-                                <input type="url"
-                                       class="input"
-                                       id="profile-url"
-                                       name="url"
-                                       value="<?php echo esc_url($current_user->user_url); ?>"
-                                       placeholder="https://">
+                                <input type="url" class="input" id="profile-url" name="url"
+                                    value="<?php echo esc_url($current_user->user_url); ?>" placeholder="https://">
                             </div>
                         </div>
 
@@ -117,12 +100,9 @@ get_header();
                         <div class="field mb-3">
                             <label class="label" for="profile-twitter">Twitter/X</label>
                             <div class="control">
-                                <input type="text"
-                                       class="input"
-                                       id="profile-twitter"
-                                       name="twitter"
-                                       value="<?php echo esc_attr(get_user_meta($user_id, 'twitter', true)); ?>"
-                                       placeholder="@usuario">
+                                <input type="text" class="input" id="profile-twitter" name="twitter"
+                                    value="<?php echo esc_attr(get_user_meta($user_id, 'twitter', true)); ?>"
+                                    placeholder="@usuario">
                             </div>
                         </div>
 
@@ -130,12 +110,9 @@ get_header();
                         <div class="field mb-3">
                             <label class="label" for="profile-linkedin">LinkedIn</label>
                             <div class="control">
-                                <input type="url"
-                                       class="input"
-                                       id="profile-linkedin"
-                                       name="linkedin"
-                                       value="<?php echo esc_url(get_user_meta($user_id, 'linkedin', true)); ?>"
-                                       placeholder="https://linkedin.com/in/usuario">
+                                <input type="url" class="input" id="profile-linkedin" name="linkedin"
+                                    value="<?php echo esc_url(get_user_meta($user_id, 'linkedin', true)); ?>"
+                                    placeholder="https://linkedin.com/in/usuario">
                             </div>
                         </div>
 
@@ -143,12 +120,9 @@ get_header();
                         <div class="field mb-3">
                             <label class="label" for="profile-github">GitHub</label>
                             <div class="control">
-                                <input type="url"
-                                       class="input"
-                                       id="profile-github"
-                                       name="github"
-                                       value="<?php echo esc_url(get_user_meta($user_id, 'github', true)); ?>"
-                                       placeholder="https://github.com/usuario">
+                                <input type="url" class="input" id="profile-github" name="github"
+                                    value="<?php echo esc_url(get_user_meta($user_id, 'github', true)); ?>"
+                                    placeholder="https://github.com/usuario">
                             </div>
                         </div>
 
@@ -156,27 +130,21 @@ get_header();
 
                         <?php // Alterar senha ?>
                         <h2 class="title is-5 has-text-weight-bold mb-3">Alterar senha</h2>
-                        <p class="has-text-grey is-size-7 mb-3">Deixe em branco se não quiser alterar.</p>
+                        <p class=" is-size-7 mb-3">Deixe em branco se não quiser alterar.</p>
 
                         <div class="field mb-3">
                             <label class="label" for="profile-password">Nova senha</label>
                             <div class="control">
-                                <input type="password"
-                                       class="input"
-                                       id="profile-password"
-                                       name="password"
-                                       autocomplete="new-password">
+                                <input type="password" class="input" id="profile-password" name="password"
+                                    autocomplete="new-password">
                             </div>
                         </div>
 
                         <div class="field mb-4">
                             <label class="label" for="profile-password-confirm">Confirmar nova senha</label>
                             <div class="control">
-                                <input type="password"
-                                       class="input"
-                                       id="profile-password-confirm"
-                                       name="password_confirm"
-                                       autocomplete="new-password">
+                                <input type="password" class="input" id="profile-password-confirm"
+                                    name="password_confirm" autocomplete="new-password">
                             </div>
                             <p class="help is-danger is-hidden">
                                 As senhas não coincidem.

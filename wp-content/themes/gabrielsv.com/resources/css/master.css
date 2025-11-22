@@ -1,5 +1,5 @@
 /* Importar Bulma CSS local */
-@import '../lib/bulma/1_0_4/css/bulma.min.css';
+@import "../lib/bulma/1_0_4/css/bulma.min.css";
 
 /* ============================================
    ESTILOS CUSTOMIZADOS DO TEMA
@@ -7,14 +7,14 @@
 
 *,
 .inter {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
 }
 
 .kb {
-  font-family: 'Kablammo', system-ui;
+  font-family: "Kablammo", system-ui;
   font-optical-sizing: auto;
-  font-variation-settings: 'MORF' 0;
+  font-variation-settings: "MORF" 0;
   user-select: none;
 }
 
@@ -28,7 +28,7 @@ input,
 code,
 pre,
 .jbm {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
   font-optical-sizing: auto;
 }
 
@@ -36,6 +36,12 @@ svg {
   width: 1rem !important;
   height: 1rem !important;
 }
+
+/* Exceção para ícones em botões específicos */
+/* #scrollToTop svg {
+  width: 2rem !important;
+  height: 2rem !important;
+} */
 
 nav.navbar a span.kb {
   font-size: 3rem;
@@ -91,6 +97,415 @@ nav.navbar a span.kb {
 }
 
 @keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   ANIMAÇÕES GLOBAIS
+   ============================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-25px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutUp {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-25px);
+    opacity: 0;
+  }
+}
+
+.has-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.has-fade-out {
+  animation: fadeOut 0.3s ease-in forwards;
+}
+
+.has-slide-in-down {
+  animation: slideInDown 0.3s ease-out forwards;
+}
+
+.has-slide-out-up {
+  animation: slideOutUp 0.3s ease-in forwards;
+}
+
+.breadcrumb * {
+  text-wrap: auto;
+}
+
+/* ============================================
+   TEMA ESCURO
+   ============================================ */
+
+/* html[data-theme="dark"] {
+  background-color: #0a0a0a;
+  color: #f5f5f5;
+}
+
+html[data-theme="dark"] body {
+  background-color: #0a0a0a;
+  color: #f5f5f5;
+}
+
+html[data-theme="dark"] .navbar {
+  background-color: #1a1a1a;
+}
+
+html[data-theme="dark"] .box,
+html[data-theme="dark"] .card {
+  background-color: #1a1a1a;
+  color: #f5f5f5;
+}
+
+html[data-theme="dark"] .input,
+html[data-theme="dark"] .textarea,
+html[data-theme="dark"] .select select {
+  background-color: #2a2a2a;
+  border-color: #4a4a4a;
+  color: #f5f5f5;
+}
+
+html[data-theme="dark"] .modal-card-head,
+html[data-theme="dark"] .modal-card-body,
+html[data-theme="dark"] .modal-card-foot {
+  background-color: #1a1a1a;
+  color: #f5f5f5;
+}
+
+html[data-theme="dark"] .modal-card-head {
+  border-bottom-color: #4a4a4a;
+}
+
+html[data-theme="dark"] .modal-card-foot {
+  border-top-color: #4a4a4a;
+}
+
+html[data-theme="dark"] .has-background-light {
+  background-color: #2a2a2a !important;
+} */
+
+/* ============================================
+   CUSTOMIZAÇÕES DA NAVBAR
+   ============================================ */
+
+/* Animação para o menu mobile */
+@media screen and (max-width: 1023px) {
+  .navbar-menu.is-active {
+    animation: slideDownNav 0.3s ease-out;
+  }
+}
+
+@keyframes slideDownNav {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Forçar padding no container principal em telas menores para corrigir bug */
+@media screen and (max-width: 1023px) {
+  .site-content.container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+/* ============================================
+   CLASSES RESPONSIVAS DE FLEXBOX
+   (Bulma não inclui essas variantes responsivas)
+   ============================================ */
+
+/* MOBILE - Até 768px */
+@media screen and (max-width: 768px) {
+  .is-flex-direction-column-mobile {
+    flex-direction: column !important;
+  }
+
+  .is-flex-direction-row-mobile {
+    flex-direction: row !important;
+  }
+
+  .is-justify-content-center-mobile {
+    justify-content: center !important;
+  }
+
+  .is-justify-content-flex-start-mobile {
+    justify-content: flex-start !important;
+  }
+
+  .is-justify-content-flex-end-mobile {
+    justify-content: flex-end !important;
+  }
+
+  .is-justify-content-space-between-mobile {
+    justify-content: space-between !important;
+  }
+
+  .has-text-centered-mobile {
+    text-align: center !important;
+  }
+
+  .has-text-left-mobile {
+    text-align: left !important;
+  }
+
+  .has-text-right-mobile {
+    text-align: right !important;
+  }
+
+  .is-align-items-flex-start-mobile {
+    align-items: flex-start !important;
+  }
+
+  .is-align-items-center-mobile {
+    align-items: center !important;
+  }
+
+  .is-align-items-flex-end-mobile {
+    align-items: flex-end !important;
+  }
+
+  .is-align-items-stretch-mobile {
+    align-items: stretch !important;
+  }
+}
+
+/* TABLET - 769px e acima */
+@media screen and (min-width: 769px) {
+  .is-flex-direction-column-tablet {
+    flex-direction: column !important;
+  }
+
+  .is-flex-direction-row-tablet {
+    flex-direction: row !important;
+  }
+
+  .is-justify-content-center-tablet {
+    justify-content: center !important;
+  }
+
+  .is-justify-content-flex-start-tablet {
+    justify-content: flex-start !important;
+  }
+
+  .is-justify-content-flex-end-tablet {
+    justify-content: flex-end !important;
+  }
+
+  .is-justify-content-space-between-tablet {
+    justify-content: space-between !important;
+  }
+
+  .has-text-centered-tablet {
+    text-align: center !important;
+  }
+
+  .has-text-left-tablet {
+    text-align: left !important;
+  }
+
+  .has-text-right-tablet {
+    text-align: right !important;
+  }
+
+  .is-align-items-flex-start-tablet {
+    align-items: flex-start !important;
+  }
+
+  .is-align-items-center-tablet {
+    align-items: center !important;
+  }
+
+  .is-align-items-flex-end-tablet {
+    align-items: flex-end !important;
+  }
+
+  .is-align-items-stretch-tablet {
+    align-items: stretch !important;
+  }
+}
+
+/* DESKTOP - 1024px e acima */
+@media screen and (min-width: 1024px) {
+  .is-flex-direction-column-desktop {
+    flex-direction: column !important;
+  }
+
+  .is-flex-direction-row-desktop {
+    flex-direction: row !important;
+  }
+
+  .is-justify-content-center-desktop {
+    justify-content: center !important;
+  }
+
+  .is-justify-content-flex-start-desktop {
+    justify-content: flex-start !important;
+  }
+
+  .is-justify-content-flex-end-desktop {
+    justify-content: flex-end !important;
+  }
+
+  .is-justify-content-space-between-desktop {
+    justify-content: space-between !important;
+  }
+
+  .has-text-centered-desktop {
+    text-align: center !important;
+  }
+
+  .has-text-left-desktop {
+    text-align: left !important;
+  }
+
+  .has-text-right-desktop {
+    text-align: right !important;
+  }
+
+  .is-align-items-flex-start-desktop {
+    align-items: flex-start !important;
+  }
+
+  .is-align-items-center-desktop {
+    align-items: center !important;
+  }
+
+  .is-align-items-flex-end-desktop {
+    align-items: flex-end !important;
+  }
+
+  .is-align-items-stretch-desktop {
+    align-items: stretch !important;
+  }
+}
+
+/* ============================================
+   COMENTÁRIOS ANINHADOS
+   ============================================ */
+
+/* Remover numeração de listas de comentários */
+.comment-list {
+  list-style: none !important;
+}
+
+.comment-list .children {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin-top: 1rem !important;
+}
+
+/* Indentação e estilo visual para respostas */
+.comment-list .children > .comment {
+  margin-left: 2rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--bulma-border);
+  position: relative;
+}
+
+/* Versão mobile - menos indentação */
+@media screen and (max-width: 768px) {
+  .comment-list .children > .comment {
+    margin-left: 1rem;
+    padding-left: 0.75rem;
+    border-left-width: 2px;
+  }
+}
+
+/* Reset da Lista */
+.comment-list,
+.children {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* --- A Lógica da Hierarquia Compacta --- */
+
+/* Remove margem esquerda padrão do WP */
+.comment-list .children {
+  margin-left: 0 !important;
+}
+
+/* O recuo acontece no ITEM, não na lista. 
+   Isso cria a linha vertical contínua. */
+.comment-list .children > li {
+  padding-left: 10px; /* Recuo mínimo */
+  border-left: 2px solid; /* Linha sólida */
+  border-color: inherit; /* Pega a cor do texto atual (funciona no dark/light) */
+  opacity: 0.9; /* Sutil transparência na borda se desejar, ou remova */
+  margin-top: 4px;
+}
+
+/* Em telas maiores, damos um pouco mais de ar, mas pouco */
+@media (min-width: 769px) {
+  .comment-list .children > li {
+    padding-left: 14px;
+  }
+}
+
+/* --- Ajustes Visuais do Comentário --- */
+
+/* Força a cor da borda da hierarquia para algo sutil baseada na cor do texto atual.
+   Usar currentColor com opacidade é o truque para funcionar em Dark/Light mode automaticamente */
+.comment-list .children > li {
+  border-color: rgba(128, 128, 128, 0.3);
+}
+
+/* Remove paddings extras do Bulma no media text */
+.compact-comment .content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Estilo do botão de responder do WP para parecer texto simples */
+.comment-reply-link {
+  font-weight: 600;
+  border: none;
+  background: none;
+  padding: 0;
+  text-decoration: none;
+  color: inherit; /* Herda a cor do tema (dark ou light) */
+  opacity: 0.8;
+}
+.comment-reply-link:hover {
+  text-decoration: underline;
+  opacity: 1;
+}
+
+/* Classe utilitária para quebrar palavras longas e evitar scroll */
+.text-break {
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
 }

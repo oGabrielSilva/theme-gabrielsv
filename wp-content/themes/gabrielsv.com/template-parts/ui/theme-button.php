@@ -1,6 +1,6 @@
-<button data-func="toggle-theme" class="btn btn-theme" type="button" role="switch" aria-pressed="false"
+<button data-func="toggle-theme" class="button" type="button" role="switch" aria-pressed="false"
     aria-label="Alternar entre tema claro e escuro" title="Clique para alternar entre tema claro e escuro">
-    <span class="d-none" data-icon="light" aria-hidden="true">
+    <span class="icon" data-icon="light" aria-hidden="true">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="lucide lucide-sun-icon lucide-sun" role="img" aria-label="Ícone do sol">
@@ -16,7 +16,7 @@
         </svg>
     </span>
 
-    <span class="d-none" data-icon="dark" aria-hidden="true">
+    <span class="icon is-hidden" data-icon="dark" aria-hidden="true">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="lucide lucide-moon-icon lucide-moon" role="img" aria-label="Ícone da lua">

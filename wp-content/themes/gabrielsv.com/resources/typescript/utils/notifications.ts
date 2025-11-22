@@ -2,7 +2,13 @@
  * Sistema de notificações Bulma (substitui toasts Bootstrap)
  */
 
-export type NotificationType = 'success' | 'danger' | 'warning' | 'info' | 'primary' | 'link';
+export type NotificationType =
+  | "success"
+  | "danger"
+  | "warning"
+  | "info"
+  | "primary"
+  | "link";
 
 export interface NotificationOptions {
   message: string;
@@ -16,39 +22,42 @@ export interface NotificationOptions {
  */
 export function showNotification(options: NotificationOptions | string): void {
   // Permitir passar apenas string (retrocompatibilidade)
-  const config: NotificationOptions = typeof options === 'string'
-    ? { message: options, type: 'info', duration: 5000, dismissible: true }
-    : { type: 'info', duration: 5000, dismissible: true, ...options };
+  const config: NotificationOptions =
+    typeof options === "string"
+      ? { message: options, type: "info", duration: 5000, dismissible: true }
+      : { type: "info", duration: 5000, dismissible: true, ...options };
 
-  const notification = document.createElement('div');
+  const notification = document.createElement("div");
   notification.className = `notification is-${config.type}`;
 
   if (config.dismissible) {
-    notification.innerHTML = `
-      <button class="delete" aria-label="Fechar"></button>
-      ${config.message}
-    `;
-  } else {
-    notification.textContent = config.message;
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete";
+    deleteBtn.setAttribute("aria-label", "Fechar");
+    notification.appendChild(deleteBtn);
   }
 
-  const container = document.querySelector('.notification-container');
+  const messageContainer = document.createElement("span");
+  messageContainer.innerHTML = config.message;
+  notification.appendChild(messageContainer);
+
+  const container = document.querySelector(".notification-container");
   if (!container) {
-    console.error('Notification container not found in DOM');
+    console.error("Notification container not found in DOM");
     return;
   }
 
   container.appendChild(notification);
 
   // Handler para fechar
-  const deleteBtn = notification.querySelector('.delete');
+  const deleteBtn = notification.querySelector(".delete");
   const removeNotification = () => {
-    notification.style.animation = 'fadeOut 0.3s';
+    notification.style.animation = "fadeOut 0.3s";
     setTimeout(() => notification.remove(), 300);
   };
 
   if (deleteBtn) {
-    deleteBtn.addEventListener('click', removeNotification);
+    deleteBtn.addEventListener("click", removeNotification);
   }
 
   // Auto-remove
@@ -61,13 +70,13 @@ export function showNotification(options: NotificationOptions | string): void {
  * Atalhos para facilitar uso
  */
 export const showSuccess = (message: string, duration = 5000) =>
-  showNotification({ message, type: 'success', duration });
+  showNotification({ message, type: "success", duration });
 
 export const showError = (message: string, duration = 5000) =>
-  showNotification({ message, type: 'danger', duration });
+  showNotification({ message, type: "danger", duration });
 
 export const showWarning = (message: string, duration = 5000) =>
-  showNotification({ message, type: 'warning', duration });
+  showNotification({ message, type: "warning", duration });
 
 export const showInfo = (message: string, duration = 5000) =>
-  showNotification({ message, type: 'info', duration });
+  showNotification({ message, type: "info", duration });

@@ -5,16 +5,16 @@
         <div class="column is-8-desktop has-text-centered py-6">
 
             <?php // Erro 404 ?>
-            <div class="mb-4">
-                <h1 class="title is-1 has-text-grey">404</h1>
+            <div class="mb-5">
+                <h1 class="title is-1 has-text-gray">404</h1>
                 <h2 class="title is-3 has-text-weight-bold mb-3">Página não encontrada</h2>
-                <p class="has-text-grey subtitle mb-4">
+                <p class="subtitle mb-4">
                     Desculpe, a página que você está procurando não existe ou foi movida.
                 </p>
             </div>
 
             <?php // Formulário de Pesquisa ?>
-            <div class="mb-4">
+            <div class="mb-5">
                 <p class="mb-3">Tente pesquisar pelo conteúdo que você procura:</p>
                 <form role="search" method="get" class="is-flex is-justify-content-center"
                     action="<?php echo home_url('/'); ?>">
@@ -31,7 +31,8 @@
 
             <?php // Botões de Navegação ?>
             <div class="is-flex is-justify-content-center is-flex-wrap-wrap" style="gap: 1rem;">
-                <a href="<?php echo home_url('/'); ?>" class="button is-primary is-inline-flex is-align-items-center" style="gap: 0.5rem;">
+                <a href="<?php echo home_url('/'); ?>" class="button is-inline-flex is-align-items-center"
+                    style="gap: 0.5rem;">
                     <span class="icon" style="width: 20px; height: 20px;">
                         <?php get_template_part('template-parts/icons/home'); ?>
                     </span>
@@ -48,9 +49,9 @@
 
             if ($recent_posts->have_posts()):
                 ?>
-                <div class="mt-6 pt-4" style="border-top: 1px solid #dbdbdb;">
-                    <h3 class="title is-5 has-text-weight-bold mb-4">Ou confira nossos posts recentes:</h3>
-                    <div class="columns is-variable is-4">
+                <div class="mt-5 pt-5" style="border-top: 1px solid #dbdbdb;">
+                    <h3 class="title is-5 has-text-weight-bold mb-5">Ou confira nossos posts recentes:</h3>
+                    <div class="columns is-variable is-4 is-justify-content-center">
                         <?php while ($recent_posts->have_posts()):
                             $recent_posts->the_post(); ?>
                             <div class="column is-4">

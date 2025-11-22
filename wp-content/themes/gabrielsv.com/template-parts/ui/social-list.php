@@ -1,4 +1,4 @@
-<ul class="list-unstyled m-0 p-0 small d-flex gap-3 flex-wrap justify-content-center align-items-center">
+<ul class="is-flex is-flex-wrap-wrap is-justify-content-center is-align-items-center" style="gap: 1.5rem;">
     <li>
         <a href="https://x.com/odev_gabriel" class="linkb" target="_blank" rel="noopener noreferrer">
             <svg xmlns="http://www.w3.org/2000/svg" style="width: 1.2rem !important; height: 1.2rem !important;"

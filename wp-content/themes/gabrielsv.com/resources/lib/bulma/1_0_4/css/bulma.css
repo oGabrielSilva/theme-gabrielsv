@@ -19531,7 +19531,7 @@ has-background-danger.is-hoverable:active {
   background-color: hsl(221, 14%, 14%) !important;
 }
 
-.has-text-grey-darker {
+.-darker {
   color: hsl(221, 14%, 21%) !important;
 }
 
@@ -19539,7 +19539,7 @@ has-background-danger.is-hoverable:active {
   background-color: hsl(221, 14%, 21%) !important;
 }
 
-.has-text-grey-dark {
+.-dark {
   color: hsl(221, 14%, 29%) !important;
 }
 
@@ -19547,7 +19547,7 @@ has-background-danger.is-hoverable:active {
   background-color: hsl(221, 14%, 29%) !important;
 }
 
-.has-text-grey {
+. {
   color: hsl(221, 14%, 48%) !important;
 }
 
@@ -19555,7 +19555,7 @@ has-background-danger.is-hoverable:active {
   background-color: hsl(221, 14%, 48%) !important;
 }
 
-.has-text-grey-light {
+.-light {
   color: hsl(221, 14%, 71%) !important;
 }
 
@@ -19563,7 +19563,7 @@ has-background-danger.is-hoverable:active {
   background-color: hsl(221, 14%, 71%) !important;
 }
 
-.has-text-grey-lighter {
+.-lighter {
   color: hsl(221, 14%, 86%) !important;
 }
 

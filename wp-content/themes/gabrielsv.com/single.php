@@ -39,7 +39,7 @@
                     <?php // Footer do Post ?>
                     <footer class="post-footer pt-4" style="border-top: 1px solid #dbdbdb;">
                         <div class="mb-4">
-                            <span class="is-size-7 has-text-grey has-text-weight-bold">Tags: </span>
+                            <span class="is-size-7  has-text-weight-bold">Tags: </span>
                             <?php
                             $tags = get_the_tags();
                             if ($tags):
@@ -49,23 +49,24 @@
                                 endforeach;
                                 echo implode(', ', $tag_links);
                             else: ?>
-                                <span class="is-size-7 has-text-grey">Nenhuma tag</span>
+                                <span class="is-size-7 ">Nenhuma tag</span>
                             <?php endif; ?>
                         </div>
 
                         <?php // Card do Autor ?>
                         <div class="box">
                             <a href="<?php echo esc_url(get_author_posts_url(get_the_author_meta('ID'))); ?>"
-                                class="is-flex is-flex-direction-column is-flex-direction-row-tablet is-align-items-flex-start"
-                                style="gap: 1rem; text-decoration: none;"
-                                aria-label="Ver perfil de <?php the_author(); ?>">
+                                class="is-flex is-flex-direction-column-mobile is-flex-direction-row-tablet is-align-items-flex-start has-text-current"
+                                style="gap: 1rem; text-decoration: none;" aria-label="Ver perfil de <?php the_author(); ?>">
                                 <div class="is-flex-shrink-0">
-                                    <?php echo get_avatar(get_the_author_meta('ID'), 80, '', get_the_author(), array('class' => 'is-rounded')); ?>
+                                    <figure class="image is-64x64">
+                                        <?php echo get_avatar(get_the_author_meta('ID'), 60, '', get_the_author(), array('class' => 'is-rounded')); ?>
+                                    </figure>
                                 </div>
                                 <div class="is-flex-grow-1">
                                     <h3 class="title is-6 has-text-weight-bold mb-1"><?php the_author(); ?></h3>
                                     <?php if (get_the_author_meta('description')): ?>
-                                        <p class="content has-text-grey is-size-7 mb-0">
+                                        <p class="content has-text- is-size-7 mb-0">
                                             <?php echo get_the_author_meta('description'); ?>
                                         </p>
                                     <?php endif; ?>

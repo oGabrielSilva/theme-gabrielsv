@@ -1,48 +1,65 @@
-import type { ThemeChangedDetail } from '../types/events';
+import type { ThemeChangedDetail } from "../types/events";
 
-type Theme = 'light' | 'dark';
+type Theme = "light" | "dark";
 
 export class ThemeManager {
-  private readonly storageKey = '_sv_theme';
-  private readonly defaultTheme: Theme = 'light';
+  private readonly storageKey = "_sv_theme";
+  private readonly defaultTheme: Theme = "light";
   private currentTheme: Theme;
+  private lightIconNode: HTMLElement | null = null;
+  private darkIconNode: HTMLElement | null = null;
 
   constructor() {
     this.currentTheme = this.getStoredTheme() || this.getSystemTheme();
   }
 
   public init(): void {
+    this.loadIconReferences();
     this.applyTheme();
     this.setupEventListeners();
   }
 
-  /**
-   * Alterna entre o tema 'light' e 'dark'.
-   */
+  private loadIconReferences(): void {
+    const firstButton = this.getToggleButtons()[0];
+    if (!firstButton) return;
+
+    const lightIcon = firstButton.querySelector<HTMLElement>(
+      '[data-icon="light"]'
+    );
+    const darkIcon =
+      firstButton.querySelector<HTMLElement>('[data-icon="dark"]');
+
+    if (lightIcon) {
+      this.lightIconNode = lightIcon.cloneNode(true) as HTMLElement;
+      this.lightIconNode.classList.remove('is-hidden');
+      lightIcon.remove();
+    }
+
+    if (darkIcon) {
+      this.darkIconNode = darkIcon.cloneNode(true) as HTMLElement;
+      this.darkIconNode.classList.remove('is-hidden');
+      darkIcon.remove();
+    }
+  }
+
   public toggleTheme(): void {
-    const newTheme: Theme = this.currentTheme === 'light' ? 'dark' : 'light';
+    const newTheme: Theme = this.currentTheme === "light" ? "dark" : "light";
     this.setTheme(newTheme);
   }
 
-  /**
-   * Define um tema específico, atualiza o estado e o DOM.
-   */
   public setTheme(theme: Theme): void {
     this.currentTheme = theme;
     localStorage.setItem(this.storageKey, theme);
     this.applyTheme();
 
-    // Dispara um evento customizado para que outras partes do app possam reagir
-    const event = new CustomEvent<ThemeChangedDetail>('themeChanged', {
+    const event = new CustomEvent<ThemeChangedDetail>("themeChanged", {
       detail: { theme: this.currentTheme },
     });
     document.dispatchEvent(event);
   }
 
   private applyTheme(): void {
-    document.documentElement.setAttribute('data-bs-theme', this.currentTheme);
-    this.updateThemeButtons();
-    this.updateThemeLinks();
+    document.documentElement.setAttribute("data-theme", this.currentTheme);
     this.updateToggleIcons();
     this.updateAccessibilityStates();
   }
@@ -50,12 +67,14 @@ export class ThemeManager {
   private updateToggleIcons(): void {
     const toggleButtons = this.getToggleButtons();
     toggleButtons.forEach((button) => {
-      const lightIcon = button.querySelector<HTMLElement>('[data-icon="light"]');
-      const darkIcon = button.querySelector<HTMLElement>('[data-icon="dark"]');
+      button.querySelectorAll("[data-icon]").forEach((icon) => icon.remove());
 
-      if (lightIcon && darkIcon) {
-        lightIcon.classList.toggle('d-none', this.currentTheme === 'dark');
-        darkIcon.classList.toggle('d-none', this.currentTheme === 'light');
+      const iconNode =
+        this.currentTheme === "light" ? this.darkIconNode : this.lightIconNode;
+
+      if (iconNode) {
+        const clonedIcon = iconNode.cloneNode(true) as HTMLElement;
+        button.appendChild(clonedIcon);
       }
     });
   }
@@ -63,63 +82,46 @@ export class ThemeManager {
   private updateAccessibilityStates(): void {
     const toggleButtons = this.getToggleButtons();
     toggleButtons.forEach((button) => {
-      const isPressed = this.currentTheme === 'dark';
-      button.setAttribute('aria-pressed', String(isPressed));
-      const newLabel = `Alternar para tema ${isPressed ? 'claro' : 'escuro'}`;
-      button.setAttribute('aria-label', newLabel);
-    });
-  }
-
-  private updateThemeButtons(): void {
-    const themeButtons = document.querySelectorAll<HTMLElement>('.btn-theme');
-    const buttonClass = this.currentTheme === 'light' ? 'btn-light' : 'btn-dark';
-    const removeClass = this.currentTheme === 'light' ? 'btn-dark' : 'btn-light';
-
-    themeButtons.forEach((button) => {
-      button.classList.remove(removeClass);
-      button.classList.add(buttonClass);
-    });
-  }
-
-  private updateThemeLinks(): void {
-    const themeLinks = document.querySelectorAll<HTMLElement>('.link-theme');
-    const linkClass = this.currentTheme === 'light' ? 'link-dark' : 'link-light';
-    const removeClass = this.currentTheme === 'light' ? 'link-light' : 'link-dark';
-
-    themeLinks.forEach((link) => {
-      link.classList.remove(removeClass);
-      link.classList.add(linkClass);
+      const isPressed = this.currentTheme === "dark";
+      button.setAttribute("aria-pressed", String(isPressed));
+      const newLabel = `Alternar para tema ${isPressed ? "claro" : "escuro"}`;
+      button.setAttribute("aria-label", newLabel);
     });
   }
 
   private setupEventListeners(): void {
     this.getToggleButtons().forEach((button) => {
-      button.addEventListener('click', (e) => {
+      button.addEventListener("click", (e) => {
         e.preventDefault();
         this.toggleTheme();
       });
     });
 
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      if (!localStorage.getItem(this.storageKey)) {
-        const systemTheme: Theme = e.matches ? 'dark' : 'light';
-        this.currentTheme = systemTheme;
-        this.applyTheme();
-      }
-    });
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        if (!localStorage.getItem(this.storageKey)) {
+          const systemTheme: Theme = e.matches ? "dark" : "light";
+          this.currentTheme = systemTheme;
+          this.applyTheme();
+        }
+      });
   }
 
   private getStoredTheme(): Theme | null {
     const stored = localStorage.getItem(this.storageKey);
-    if (stored === 'light' || stored === 'dark') {
+    if (stored === "light" || stored === "dark") {
       return stored;
     }
     return null;
   }
 
   private getSystemTheme(): Theme {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
+    if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
+      return "dark";
     }
     return this.defaultTheme;
   }

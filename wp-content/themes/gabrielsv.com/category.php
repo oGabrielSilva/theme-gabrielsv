@@ -9,7 +9,7 @@
             ?>
         </h1>
         <?php if (category_description()): ?>
-            <p class="has-text-grey subtitle">
+            <p class="subtitle">
                 <?php echo category_description(); ?>
             </p>
         <?php endif; ?>
@@ -31,7 +31,7 @@
     <?php else: ?>
         <div class="has-text-centered py-6">
             <h2 class="title is-4 has-text-weight-bold mb-3">Nenhum post encontrado nesta categoria</h2>
-            <p class="has-text-grey">Explore outras categorias ou volte para a página inicial.</p>
+            <p>Explore outras categorias ou volte para a página inicial.</p>
             <a href="<?php echo home_url('/'); ?>" class="button is-primary mt-3">Voltar ao Início</a>
         </div>
     <?php endif; ?>

@@ -18,7 +18,9 @@ if (!is_user_logged_in()) {
     <div class="dropdown is-right is-hoverable">
         <div class="dropdown-trigger">
             <button class="button is-small p-1" aria-haspopup="true" aria-controls="userDropdown" aria-label="Menu do usuário">
-                <?php echo get_avatar($current_user->ID, 24, '', '', array('class' => 'is-rounded')); ?>
+                <figure class="image is-24x24">
+                    <?php echo get_avatar($current_user->ID, 24, '', '', array('class' => 'is-rounded')); ?>
+                </figure>
             </button>
         </div>
         <div class="dropdown-menu" id="userDropdown" role="menu">

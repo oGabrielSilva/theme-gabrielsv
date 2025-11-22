@@ -6,6 +6,9 @@ export function initCookieBanner(): void {
     return;
   }
 
+  // Prevenir piscar na tela ao carregar a página
+  banner.style.display = 'none';
+
   const cookieName = 'theme_cookies_accepted';
 
   function hasCookie(): boolean {
@@ -18,20 +21,34 @@ export function initCookieBanner(): void {
     document.cookie = `${cookieName}=1;expires=${expires.toUTCString()};path=/;SameSite=Lax`;
   }
 
+  function showBanner(): void {
+    banner.style.display = 'block';
+    banner.classList.remove('has-fade-out');
+    banner.classList.add('has-fade-in');
+  }
+
+  function hideBanner(): void {
+    banner.classList.remove('has-fade-in');
+    banner.classList.add('has-fade-out');
+    setTimeout(() => {
+      banner.style.display = 'none';
+    }, 300); // Duração da animação
+  }
+
   if (!hasCookie()) {
     setTimeout(() => {
-      banner.style.display = 'block';
+      showBanner();
     }, 1500);
 
     acceptBtn.addEventListener('click', () => {
       setCookie();
-      banner.style.display = 'none';
+      hideBanner();
     });
 
     setTimeout(() => {
       if (!hasCookie()) {
         setCookie();
-        banner.style.display = 'none';
+        hideBanner();
       }
     }, 30000);
   }

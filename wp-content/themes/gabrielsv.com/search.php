@@ -5,7 +5,7 @@
         <h1 class="title is-2 has-text-weight-bold mb-3">
             Resultados da Pesquisa
         </h1>
-        <p class="has-text-grey subtitle">
+        <p class=" subtitle">
             <?php
             global $wp_query;
             $total = $wp_query->found_posts;
@@ -38,7 +38,7 @@
     <?php else: ?>
         <div class="has-text-centered py-6">
             <h2 class="title is-4 has-text-weight-bold mb-3">Nenhum resultado encontrado</h2>
-            <p class="has-text-grey mb-4">Tente refinar sua pesquisa com outras palavras-chave.</p>
+            <p class=" mb-4">Tente refinar sua pesquisa com outras palavras-chave.</p>
 
             <?php // Formulário de pesquisa ?>
             <form role="search" method="get" class="is-flex is-justify-content-center mb-4"
@@ -54,7 +54,8 @@
                 </div>
             </form>
 
-            <a href="<?php echo home_url('/'); ?>" class="button is-primary is-inline-flex is-align-items-center" style="gap: 0.5rem;">
+            <a href="<?php echo home_url('/'); ?>" class="button is-primary is-inline-flex is-align-items-center"
+                style="gap: 0.5rem;">
                 <span class="icon" style="width: 20px; height: 20px;">
                     <?php get_template_part('template-parts/icons/home'); ?>
                 </span>

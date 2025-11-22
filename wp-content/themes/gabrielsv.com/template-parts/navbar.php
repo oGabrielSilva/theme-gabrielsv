@@ -1,17 +1,17 @@
 <nav class="navbar is-fixed-top" role="navigation" aria-label="Navegação principal">
-    <div class="container-fluid">
-        <div class="navbar-brand">
-            <a class="navbar-item" href="/" role="banner" aria-label="Gabriel Silva - Página inicial">
-                <span class="kb" aria-hidden="true">G</span>
-                <span class="is-sr-only">Gabriel Silva - Voltar ao início</span>
-            </a>
+    <div class="navbar-brand">
+        <a class="navbar-item" href="/" role="banner" aria-label="Gabriel Silva - Página inicial">
+            <span class="kb" aria-hidden="true">G</span>
+            <span class="is-sr-only">Gabriel Silva - Voltar ao início</span>
+        </a>
 
-            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-            </a>
-        </div>
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+    </div>
 
         <div id="navbarMenu" class="navbar-menu">
             <div class="navbar-start">
@@ -45,11 +45,10 @@
                 </div>
             </div>
         </div>
-    </div>
 </nav>
 
 <?php // Modal de busca ?>
-<form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
+<form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>" id="search-form">
     <div class="modal" id="searchModal">
         <div class="modal-background"></div>
         <div class="modal-card">
@@ -67,7 +66,7 @@
                 </div>
             </section>
             <footer class="modal-card-foot">
-                <button class="button is-primary" type="submit" aria-label="Buscar">
+                <button class="button is-primary" type="submit" aria-label="Buscar" id="search-submit-btn">
                     Buscar
                     <span class="icon is-small ml-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
