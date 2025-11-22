@@ -64,7 +64,8 @@ function theme_hide_admin_bar()
 }
 add_action('after_setup_theme', 'theme_hide_admin_bar');
 
-// Bloquear wp-login.php (retorna 404)
+// ❌ DESABILITADO: Bloquear wp-login.php (admin precisa fazer login)
+/*
 function theme_block_wp_login()
 {
     global $pagenow;
@@ -76,6 +77,7 @@ function theme_block_wp_login()
     }
 }
 add_action('init', 'theme_block_wp_login', 1);
+*/
 
 // Bloquear wp-admin para Subscribers (exceto AJAX)
 function theme_block_admin_for_subscribers()
