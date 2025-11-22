@@ -1,11 +1,21 @@
 <?php
 /**
  * Template de Comentários
+ *
+ * ❌ DESABILITADO: Sistema de comentários removido
  */
 
 if (post_password_required()) {
     return;
 }
+
+// Sistema de comentários desabilitado
+return;
+
+// ============================================
+// CÓDIGO ORIGINAL DESABILITADO (mantido para referência)
+// ============================================
+/*
 ?>
 
 <div id="comments" class="comments-area mt-5">
@@ -152,3 +162,4 @@ if (post_password_required()) {
     </div>
 
 </div>
+*/

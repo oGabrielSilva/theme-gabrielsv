@@ -2,8 +2,18 @@
 /**
  * Template Name: Meu Perfil
  * Template para a página /eu
+ *
+ * ❌ DESABILITADO: Perfis públicos removidos
  */
 
+// Redirecionar para home (sistema desabilitado)
+wp_redirect(home_url());
+exit;
+
+// ============================================
+// CÓDIGO ORIGINAL DESABILITADO (mantido para referência)
+// ============================================
+/*
 // Redirecionar se não estiver logado
 if (!is_user_logged_in()) {
     wp_redirect(home_url('/auth'));
@@ -162,3 +172,4 @@ get_header();
 </main>
 
 <?php get_footer(); ?>
+*/

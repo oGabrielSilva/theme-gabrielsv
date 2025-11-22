@@ -1,4 +1,11 @@
 <?php
+/**
+ * ❌ DESABILITADO: Só exibir dropdown para admins (não para visitantes)
+ */
+if (!current_user_can('manage_options')) {
+    return;
+}
+
 if (!is_user_logged_in()) {
     // Usuário deslogado - mostrar ícone de login (exceto na própria página de login)
     if (!is_page('auth')) {

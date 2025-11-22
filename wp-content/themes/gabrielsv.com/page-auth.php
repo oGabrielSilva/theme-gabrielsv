@@ -2,8 +2,18 @@
 /**
  * Template Name: Autenticação
  * Template para a página /auth
+ *
+ * ❌ DESABILITADO: Sistema de autenticação pública removido
  */
 
+// Redirecionar para home (sistema desabilitado)
+wp_redirect(home_url());
+exit;
+
+// ============================================
+// CÓDIGO ORIGINAL DESABILITADO (mantido para referência)
+// ============================================
+/*
 // Redirecionar se já estiver logado (exceto se estiver resetando senha)
 $is_reset_page = isset($_GET['action']) && $_GET['action'] === 'rp';
 
@@ -292,3 +302,4 @@ get_header();
 </div>
 
 <?php get_footer(); ?>
+*/

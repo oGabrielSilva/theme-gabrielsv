@@ -140,37 +140,17 @@ add_action('template_redirect', 'theme_redirect_author_for_subscribers');
 // ============================================
 
 /**
- * Obtém o IP real do cliente, considerando proxies confiáveis.
+ * ✅ Obtém o IP real do cliente (versão segura)
+ *
+ * CORREÇÃO: Usa apenas REMOTE_ADDR, que não pode ser falsificado.
+ * Headers HTTP como X-Forwarded-For podem ser manipulados pelo cliente.
  *
  * @return string IP do cliente
  */
 function theme_get_client_ip()
 {
-    $ip_keys = array(
-        'HTTP_CF_CONNECTING_IP', // Cloudflare
-        'HTTP_X_FORWARDED_FOR',   // Proxy genérico
-        'HTTP_X_REAL_IP',         // Nginx proxy
-        'REMOTE_ADDR'             // Fallback
-    );
-
-    foreach ($ip_keys as $key) {
-        if (!empty($_SERVER[$key])) {
-            $ip = $_SERVER[$key];
-
-            // Se for X-Forwarded-For, pode conter múltiplos IPs (pega o primeiro)
-            if ($key === 'HTTP_X_FORWARDED_FOR' && strpos($ip, ',') !== false) {
-                $ip_list = explode(',', $ip);
-                $ip = trim($ip_list[0]);
-            }
-
-            // Validar se é IP válido
-            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                return $ip;
-            }
-        }
-    }
-
-    // Fallback: retornar REMOTE_ADDR mesmo que seja privado
+    // ✅ Solução mais segura: NUNCA confiar em headers HTTP
+    // REMOTE_ADDR é o único que não pode ser falsificado
     return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 }
 
@@ -178,7 +158,8 @@ function theme_get_client_ip()
 // AJAX ENDPOINTS - AUTENTICAÇÃO
 // ============================================
 
-// Endpoint para login customizado
+// ❌ DESABILITADO: Endpoint para login customizado
+/*
 function theme_ajax_custom_login()
 {
     // Verificar nonce (CSRF protection)
@@ -219,8 +200,10 @@ function theme_ajax_custom_login()
     ));
 }
 add_action('wp_ajax_nopriv_custom_login', 'theme_ajax_custom_login');
+*/
 
-// Endpoint para registro de usuários
+// ❌ DESABILITADO: Endpoint para registro de usuários
+/*
 function theme_ajax_custom_register()
 {
     // Verificar nonce (CSRF protection)
@@ -289,8 +272,10 @@ function theme_ajax_custom_register()
     ));
 }
 add_action('wp_ajax_nopriv_custom_register', 'theme_ajax_custom_register');
+*/
 
-// Endpoint para atualizar perfil
+// ❌ DESABILITADO: Endpoint para atualizar perfil
+/*
 function theme_ajax_update_profile()
 {
     // Verificar nonce (CSRF protection)
@@ -346,11 +331,14 @@ function theme_ajax_update_profile()
     ));
 }
 add_action('wp_ajax_update_profile', 'theme_ajax_update_profile');
+*/
 
 // ============================================
 // AJAX: RECUPERAÇÃO DE SENHA
 // ============================================
 
+// ❌ DESABILITADO: Endpoint para solicitar reset de senha
+/*
 function theme_ajax_password_reset_request()
 {
     // Verificar nonce
@@ -422,7 +410,10 @@ function theme_ajax_password_reset_request()
     ));
 }
 add_action('wp_ajax_nopriv_password_reset_request', 'theme_ajax_password_reset_request');
+*/
 
+// ❌ DESABILITADO: Endpoint para confirmar reset de senha
+/*
 function theme_ajax_password_reset_confirm()
 {
     // Verificar nonce (CSRF protection)
@@ -481,11 +472,14 @@ function theme_ajax_password_reset_confirm()
 }
 add_action('wp_ajax_nopriv_password_reset_confirm', 'theme_ajax_password_reset_confirm');
 add_action('wp_ajax_password_reset_confirm', 'theme_ajax_password_reset_confirm');
+*/
 
 // ============================================
 // AJAX: DELETAR COMENTÁRIO
 // ============================================
 
+// ❌ DESABILITADO: Endpoint para deletar comentário
+/*
 function theme_ajax_delete_comment()
 {
     // Verificar nonce (CSRF protection)
@@ -541,10 +535,12 @@ function theme_ajax_delete_comment()
     }
 }
 add_action('wp_ajax_delete_user_comment', 'theme_ajax_delete_comment');
+*/
 
 /**
- * AJAX: Submeter comentário
+ * ❌ DESABILITADO: AJAX: Submeter comentário
  */
+/*
 function theme_ajax_submit_comment()
 {
     // Verificar nonce
@@ -608,6 +604,7 @@ function theme_ajax_submit_comment()
     ));
 }
 add_action('wp_ajax_submit_comment', 'theme_ajax_submit_comment');
+*/
 
 function theme_styles()
 {
@@ -625,7 +622,8 @@ function theme_scripts()
         'in_footer' => false,
     ]);
 
-    // Script de comentários apenas em posts com comentários
+    // ❌ DESABILITADO: Script de comentários
+    /*
     if (is_singular() && comments_open()) {
         wp_enqueue_script('comments', get_template_directory_uri() . '/resources/dist/javascript/comments.min.js', array(), '1.0.0', [
             'in_footer' => true,
@@ -635,8 +633,10 @@ function theme_scripts()
             'nonce' => wp_create_nonce('comment_nonce'),
         ));
     }
+    */
 
-    // Script de autenticação na página /auth
+    // ❌ DESABILITADO: Script de autenticação
+    /*
     if (is_page_template('page-auth.php')) {
         wp_enqueue_script('auth', get_template_directory_uri() . '/resources/dist/javascript/auth.min.js', array(), '1.0.0', [
             'in_footer' => true,
@@ -646,8 +646,10 @@ function theme_scripts()
             'nonce' => wp_create_nonce('auth_nonce'),
         ));
     }
+    */
 
-    // Script de perfil na página /eu
+    // ❌ DESABILITADO: Script de perfil
+    /*
     if (is_page_template('page-eu.php')) {
         wp_enqueue_script('profile', get_template_directory_uri() . '/resources/dist/javascript/profile.min.js', array(), '1.0.0', [
             'in_footer' => true,
@@ -657,6 +659,7 @@ function theme_scripts()
             'nonce' => wp_create_nonce('profile_nonce'),
         ));
     }
+    */
 }
 add_action('wp_enqueue_scripts', 'theme_scripts');
 
@@ -719,13 +722,20 @@ function theme_clear_post_caches($post_id)
 
     // Limpar cache de posts do autor
     $author_id = get_post_field('post_author', $post_id);
+
+    // ✅ CORREÇÃO: Sanitizar author_id e usar esc_like()
+    $author_id = intval($author_id); // Garantir que é inteiro
+
+    $pattern_posts = $wpdb->esc_like('_transient_author_posts_') . '%_' . $author_id;
     $wpdb->query($wpdb->prepare(
         "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
-        '_transient_author_posts_%_' . $author_id
+        $pattern_posts
     ));
+
+    $pattern_timeout = $wpdb->esc_like('_transient_timeout_author_posts_') . '%_' . $author_id;
     $wpdb->query($wpdb->prepare(
         "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
-        '_transient_timeout_author_posts_%_' . $author_id
+        $pattern_timeout
     ));
 }
 add_action('save_post', 'theme_clear_post_caches');
@@ -941,7 +951,8 @@ add_action('init', 'theme_comments_setup');
 // EMAIL NOTIFICATIONS - COMENTÁRIOS
 // ============================================
 
-// Notificar quando comentário for aprovado
+// ❌ DESABILITADO: Notificar quando comentário for aprovado
+/*
 function theme_notify_comment_approved($new_status, $old_status, $comment)
 {
     // Só notificar se mudou para "approved"
@@ -987,8 +998,10 @@ function theme_notify_comment_approved($new_status, $old_status, $comment)
     set_transient($transient_key, true, 5 * MINUTE_IN_SECONDS);
 }
 add_action('transition_comment_status', 'theme_notify_comment_approved', 10, 3);
+*/
 
-// Notificar quando comentário receber resposta
+// ❌ DESABILITADO: Notificar quando comentário receber resposta
+/*
 function theme_notify_comment_reply($comment_id, $comment)
 {
     // Verificar se é uma resposta (tem comment_parent)
@@ -1048,6 +1061,7 @@ function theme_notify_comment_reply($comment_id, $comment)
     set_transient($transient_key, true, 5 * MINUTE_IN_SECONDS);
 }
 add_action('comment_post', 'theme_notify_comment_reply', 10, 2);
+*/
 
 // Template customizado para comentários individuais
 function theme_comment_template($comment, $args, $depth)
@@ -1122,3 +1136,37 @@ function theme_comment_template($comment, $args, $depth)
 
         <?php
 }
+
+// ============================================
+// FORÇAR DESABILITAÇÃO DE REGISTRO E COMENTÁRIOS
+// ============================================
+
+/**
+ * Forçar desabilitação de registro público
+ */
+function theme_force_disable_registration()
+{
+    // Garantir que registro esteja desabilitado
+    update_option('users_can_register', 0);
+
+    // Bloquear tentativas de registro via URL direta
+    if (isset($_GET['action']) && $_GET['action'] === 'register') {
+        wp_redirect(home_url());
+        exit;
+    }
+}
+add_action('init', 'theme_force_disable_registration');
+
+/**
+ * Desabilitar comentários completamente
+ */
+function theme_disable_comments()
+{
+    // Fechar comentários em todos os posts
+    add_filter('comments_open', '__return_false', 20, 2);
+    add_filter('pings_open', '__return_false', 20, 2);
+
+    // Ocultar opção de comentários do admin
+    add_filter('comments_array', '__return_empty_array', 10, 2);
+}
+add_action('admin_init', 'theme_disable_comments');
