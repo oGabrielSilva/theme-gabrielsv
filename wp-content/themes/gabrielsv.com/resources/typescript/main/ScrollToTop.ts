@@ -38,7 +38,9 @@ export class ScrollToTop {
       this.button.classList.remove('has-fade-in');
       this.button.classList.add('has-fade-out');
       setTimeout(() => {
-        this.button.style.display = 'none';
+        if (this.button) {
+          this.button.style.display = 'none';
+        }
       }, 300); // Duração da animação
       this.isVisible = false;
     }

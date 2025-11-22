@@ -22,15 +22,18 @@ export function initCookieBanner(): void {
   }
 
   function showBanner(): void {
+    if (!banner) return;
     banner.style.display = 'block';
     banner.classList.remove('has-fade-out');
     banner.classList.add('has-fade-in');
   }
 
   function hideBanner(): void {
+    if (!banner) return;
     banner.classList.remove('has-fade-in');
     banner.classList.add('has-fade-out');
     setTimeout(() => {
+      if (!banner) return;
       banner.style.display = 'none';
     }, 300); // Duração da animação
   }

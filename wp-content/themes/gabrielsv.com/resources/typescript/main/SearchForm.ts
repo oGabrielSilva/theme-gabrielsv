@@ -17,7 +17,7 @@ export class SearchForm {
     this.form.addEventListener('submit', this.handleSubmit.bind(this));
   }
 
-  private handleSubmit(e: Event): void {
+  private handleSubmit(_e: Event): void {
     // Não prevenir o submit - deixar o form redirecionar normalmente
     // Apenas adicionar loading indicator no botão
 
