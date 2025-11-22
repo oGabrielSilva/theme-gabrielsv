@@ -1172,3 +1172,34 @@ function theme_disable_comments()
     add_filter('comments_array', '__return_empty_array', 10, 2);
 }
 add_action('admin_init', 'theme_disable_comments');
+
+// ============================================
+// SECURITY HEADERS
+// ============================================
+
+/**
+ * ✅ Adicionar security headers básicos
+ *
+ * Headers implementados:
+ * - X-Content-Type-Options: Previne MIME-sniffing attacks
+ * - X-Frame-Options: Previne clickjacking
+ * - X-XSS-Protection: Ativa filtro XSS do navegador
+ * - Referrer-Policy: Controla informações de referrer
+ */
+function theme_add_security_headers()
+{
+    // Prevenir MIME-type sniffing
+    header("X-Content-Type-Options: nosniff");
+
+    // Prevenir clickjacking (permite embed apenas do próprio domínio)
+    header("X-Frame-Options: SAMEORIGIN");
+
+    // Ativar XSS filter do browser (legacy, mas compatível)
+    header("X-XSS-Protection: 1; mode=block");
+
+    // Controlar referrer em links externos
+    header("Referrer-Policy: strict-origin-when-cross-origin");
+
+    // TODO: Adicionar Content-Security-Policy quando definir estratégia de Analytics/Monetização
+}
+add_action('send_headers', 'theme_add_security_headers');
