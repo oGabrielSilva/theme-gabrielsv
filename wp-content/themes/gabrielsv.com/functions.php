@@ -142,17 +142,23 @@ add_action('template_redirect', 'theme_redirect_author_for_subscribers');
 // ============================================
 
 /**
- * ✅ Obtém o IP real do cliente (versão segura)
+ * ✅ Obtém o IP real do cliente (versão segura com suporte a Cloudflare)
  *
- * CORREÇÃO: Usa apenas REMOTE_ADDR, que não pode ser falsificado.
- * Headers HTTP como X-Forwarded-For podem ser manipulados pelo cliente.
+ * CORREÇÃO: Quando atrás do Cloudflare, REMOTE_ADDR retorna o IP do proxy.
+ * Nesse caso, confiamos no HTTP_CF_CONNECTING_IP, que é um header específico
+ * do Cloudflare que não pode ser falsificado pelo cliente (apenas pelo proxy).
  *
  * @return string IP do cliente
  */
 function theme_get_client_ip()
 {
-    // ✅ Solução mais segura: NUNCA confiar em headers HTTP
-    // REMOTE_ADDR é o único que não pode ser falsificado
+    // ✅ Se estiver atrás do Cloudflare, usar header específico
+    // HTTP_CF_CONNECTING_IP é injetado pelo Cloudflare e confiável
+    if (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+        return $_SERVER['HTTP_CF_CONNECTING_IP'];
+    }
+
+    // Fallback para REMOTE_ADDR (conexão direta ou sem Cloudflare)
     return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 }
 
@@ -764,7 +770,7 @@ function theme_add_google_fonts()
 }
 add_action('wp_head', 'theme_add_google_fonts');
 
-// Desativar API REST do WordPress
+// Desativar API REST do WordPress (com exceções para plugins de segurança)
 function theme_disable_rest_api()
 {
     // Remover link da API REST do head
@@ -774,15 +780,36 @@ function theme_disable_rest_api()
     // Remover headers da API REST
     remove_action('template_redirect', 'rest_output_link_header', 11);
 
-    // Desativar completamente a API REST para usuários não logados
+    // Desativar API REST para usuários não logados (com whitelist)
     add_filter('rest_authentication_errors', function ($result) {
         if (!empty($result)) {
             return $result;
         }
-        if (!is_user_logged_in()) {
-            return new WP_Error('rest_not_logged_in', 'Você não tem permissão para acessar a API.', array('status' => 401));
+
+        // Permitir acesso se estiver logado
+        if (is_user_logged_in()) {
+            return $result;
         }
-        return $result;
+
+        // Whitelist: Permitir endpoints específicos para plugins de segurança
+        $current_route = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+
+        // Wordfence precisa de alguns endpoints para comunicação
+        if (strpos($current_route, 'wordfence') !== false) {
+            return $result;
+        }
+
+        // Cloudflare pode fazer health checks via oembed
+        if (strpos($current_route, 'oembed') !== false) {
+            return $result;
+        }
+
+        // Bloquear todo o resto da API para não-logados
+        return new WP_Error(
+            'rest_not_logged_in',
+            'API não disponível publicamente.',
+            array('status' => 401)
+        );
     });
 }
 add_action('init', 'theme_disable_rest_api');
