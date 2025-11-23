@@ -855,13 +855,13 @@ function theme_add_social_fields($user_fields)
 }
 add_filter('user_contactmethods', 'theme_add_social_fields');
 
-// Customizar paginação para usar classes do Bootstrap
+// Customizar paginação para usar classes do Bulma
 function theme_bootstrap_pagination($args = array())
 {
     $defaults = array(
         'mid_size' => 2,
-        'prev_text' => '&laquo;',
-        'next_text' => '&raquo;',
+        'prev_text' => 'Anterior',
+        'next_text' => 'Próximo',
         'type' => 'array',
         'current' => max(1, get_query_var('paged')),
     );
@@ -873,27 +873,26 @@ function theme_bootstrap_pagination($args = array())
         return;
     }
 
-    echo '<nav aria-label="Navegação de páginas">';
-    echo '<ul class="pagination justify-content-center">';
+    echo '<nav class="pagination is-centered" role="navigation" aria-label="Navegação de páginas">';
+    echo '<ul class="pagination-list">';
 
     foreach ($links as $link) {
-        $class = 'page-item';
-
         // Detectar página ativa
         if (strpos($link, 'current') !== false) {
-            $class .= ' active';
-            $link = str_replace('page-numbers current', 'page-link', $link);
-        } else {
-            $link = str_replace('page-numbers', 'page-link', $link);
+            $link = str_replace('page-numbers current', 'pagination-link is-current', $link);
+            $link = str_replace('<span', '<a', $link);
+            $link = str_replace('</span>', '</a>', $link);
+            echo "<li>$link</li>";
         }
-
         // Detectar dots
-        if (strpos($link, 'dots') !== false) {
-            $class .= ' disabled';
-            $link = str_replace('dots', 'page-link', $link);
+        elseif (strpos($link, 'dots') !== false) {
+            echo '<li><span class="pagination-ellipsis">&hellip;</span></li>';
         }
-
-        echo "<li class='$class'>$link</li>";
+        // Links normais
+        else {
+            $link = str_replace('page-numbers', 'pagination-link', $link);
+            echo "<li>$link</li>";
+        }
     }
 
     echo '</ul>';

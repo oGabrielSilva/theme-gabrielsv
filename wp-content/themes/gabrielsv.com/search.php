@@ -54,8 +54,7 @@
                 </div>
             </form>
 
-            <a href="<?php echo home_url('/'); ?>" class="button is-primary is-inline-flex is-align-items-center"
-                style="gap: 0.5rem;">
+            <a href="<?php echo home_url('/'); ?>" class="button is-inline-flex is-align-items-center" style="gap: 0.5rem;">
                 <span class="icon" style="width: 20px; height: 20px;">
                     <?php get_template_part('template-parts/icons/home'); ?>
                 </span>

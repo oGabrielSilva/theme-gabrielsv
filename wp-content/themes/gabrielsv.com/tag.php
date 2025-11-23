@@ -1,5 +1,9 @@
 <?php get_header(); ?>
 
+<script>
+    document.body.classList.remove('tag');
+</script>
+
 <main class="container my-6">
     <header class="mb-6">
         <h1 class="title is-2 has-text-weight-bold mb-3">

@@ -1,12 +1,12 @@
 import { initCookieBanner } from "./main/CookieBanner";
-import { ScrollToTop } from "./main/ScrollToTop";
-import { initSearchModal } from "./main/SearchModal";
-import { SearchForm } from "./main/SearchForm";
-import { ThemeManager } from "./main/ThemeManager";
 import { NavbarSpacer } from "./main/NavbarSpacer";
+import { ScrollToTop } from "./main/ScrollToTop";
+import { SearchForm } from "./main/SearchForm";
+import { initSearchModal } from "./main/SearchModal";
+import { ThemeManager } from "./main/ThemeManager";
 // Componentes Bulma
-import { initNavbarBurger } from "./bulma/NavbarBurger";
 import { initBulmaModals } from "./bulma/Modals";
+import { initNavbarBurger } from "./bulma/NavbarBurger";
 
 document.addEventListener("DOMContentLoaded", () => {
   // Espaçamento dinâmico da navbar fixa
@@ -68,5 +68,3 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("ScrollToTop error:", error);
   }
 });
-
-console.log("main loaded");
