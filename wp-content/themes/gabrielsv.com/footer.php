@@ -47,6 +47,18 @@
                         </div>
 
                         <div>
+                            <a href="<?php echo esc_url(home_url('/sobre')); ?>"
+                                class="is-size-7 has-text-weight-medium" style="text-decoration: none;"
+                                aria-label="Sobre o autor">
+                                Sobre
+                            </a>
+                            |
+                            <a href="<?php echo esc_url(home_url('/contato')); ?>"
+                                class="is-size-7 has-text-weight-medium" style="text-decoration: none;"
+                                aria-label="Entre em contato">
+                                Contato
+                            </a>
+                            |
                             <a href="https://gabrielsv.com" target="_blank" rel="noopener noreferrer"
                                 class="is-size-7 has-text-weight-medium" style="text-decoration: none;"
                                 aria-label="Visitar site principal de Gabriel Silva">

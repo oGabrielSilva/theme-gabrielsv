@@ -1,6 +1,6 @@
 <?php // Breadcrumbs ?>
-<nav aria-label="breadcrumb" class="mb-4">
-    <ul class="breadcrumb is-size-7">
+<nav aria-label="breadcrumb" class="mb-4 breadcrumb is-size-7">
+    <ul>
         <li>
             <a href="<?php echo home_url('/'); ?>">Início</a>
         </li>

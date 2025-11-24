@@ -13,10 +13,9 @@
         if (!empty($categories)):
             foreach ($categories as $category):
                 ?>
-                <a class="navbar-item is-flex is-justify-content-space-between"
+                <a class="navbar-item"
                     href="<?php echo esc_url(get_category_link($category->term_id)); ?>">
                     <span><?php echo esc_html(theme_get_category_name($category)); ?></span>
-                    <span class="tag ml-2"><?php echo $category->count; ?></span>
                 </a>
             <?php endforeach;
         else: ?>

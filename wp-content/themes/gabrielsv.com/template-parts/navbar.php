@@ -16,7 +16,8 @@
         <div id="navbarMenu" class="navbar-menu">
             <div class="navbar-start">
                 <a class="navbar-item" href="/">Início</a>
-                <a class="navbar-item" href="https://gabrielsv.com">Quem sou</a>
+                <a class="navbar-item" href="<?php echo esc_url(home_url('/sobre')); ?>">Sobre</a>
+                <a class="navbar-item" href="<?php echo esc_url(home_url('/contato')); ?>">Contato</a>
                 <?php get_template_part('template-parts/ui/categories-dropdown') ?>
             </div>
 
@@ -69,11 +70,7 @@
                 <button class="button is-primary" type="submit" aria-label="Buscar" id="search-submit-btn">
                     Buscar
                     <span class="icon is-small ml-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m21 21-4.34-4.34" />
-                            <circle cx="11" cy="11" r="8" />
-                        </svg>
+                        <?php get_template_part('template-parts/icons/search'); ?>
                     </span>
                 </button>
             </footer>

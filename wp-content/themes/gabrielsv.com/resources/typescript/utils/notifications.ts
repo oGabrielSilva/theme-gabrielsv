@@ -37,13 +37,12 @@ export function showNotification(options: NotificationOptions | string): void {
     notification.appendChild(deleteBtn);
   }
 
-  const messageContainer = document.createElement("span");
-  messageContainer.innerHTML = config.message;
-  notification.appendChild(messageContainer);
+  // Adicionar mensagem diretamente ao notification (sem span wrapper)
+  const textNode = document.createTextNode(config.message);
+  notification.appendChild(textNode);
 
   const container = document.querySelector(".notification-container");
   if (!container) {
-    console.error("Notification container not found in DOM");
     return;
   }
 

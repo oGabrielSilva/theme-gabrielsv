@@ -3,6 +3,7 @@ import { NavbarSpacer } from "./main/NavbarSpacer";
 import { ScrollToTop } from "./main/ScrollToTop";
 import { SearchForm } from "./main/SearchForm";
 import { initSearchModal } from "./main/SearchModal";
+import { ShareButtons } from "./main/ShareButtons";
 import { ThemeManager } from "./main/ThemeManager";
 // Componentes Bulma
 import { initBulmaModals } from "./bulma/Modals";
@@ -66,5 +67,12 @@ document.addEventListener("DOMContentLoaded", () => {
     new ScrollToTop();
   } catch (error) {
     console.error("ScrollToTop error:", error);
+  }
+
+  // Share buttons
+  try {
+    new ShareButtons();
+  } catch (error) {
+    console.error("ShareButtons error:", error);
   }
 });

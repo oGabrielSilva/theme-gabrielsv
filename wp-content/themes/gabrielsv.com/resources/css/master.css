@@ -509,3 +509,30 @@ html[data-theme="dark"] .has-background-light {
   word-break: break-word;
   hyphens: auto;
 }
+
+/* ============================================
+   BOTÕES DE COMPARTILHAMENTO
+   ============================================ */
+
+.share-buttons-dropdown .share-trigger {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.share-buttons-dropdown .dropdown-menu {
+  z-index: 9999;
+}
+
+.share-buttons-dropdown .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Ajuste responsivo para mobile */
+@media screen and (max-width: 768px) {
+  .share-buttons-dropdown.dropdown.is-right .dropdown-menu {
+    left: auto;
+    right: 0;
+  }
+}

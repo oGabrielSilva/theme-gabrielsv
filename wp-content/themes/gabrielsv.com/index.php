@@ -54,7 +54,6 @@
     <?php // Seção de Posts Recentes ?>
     <?php
     $recent_posts = new WP_Query(array(
-        'posts_per_page' => 6,
         'post_status' => 'publish',
         'offset' => 1
     ));
@@ -118,7 +117,7 @@
         'orderby' => 'name',
         'order' => 'ASC',
         'hide_empty' => true,
-        'number' => 3
+        'number' => 10
     ));
 
     if (!empty($categories)):
@@ -127,7 +126,7 @@
 
             $category_posts = new WP_Query(array(
                 'cat' => $category->term_id,
-                'posts_per_page' => 3,
+                'posts_per_page' => 5,
                 'post_status' => 'publish'
             ));
 
@@ -138,7 +137,8 @@
                         <h2 class="has-text-grey is-5 has-text-weight-bold m-0 is-family-monospace">
                             <?php echo esc_html($category_name); ?>
                         </h2>
-                        <a href="<?php echo esc_url(get_category_link($category->term_id)); ?>" class="button is-ghost is-small">
+                        <a href="<?php echo esc_url(get_category_link($category->term_id)); ?>"
+                            class="button is-ghost has-text-warning is-small">
                             Ver tudo
                         </a>
                     </div>
@@ -151,26 +151,28 @@
                                     <?php if (has_post_thumbnail()): ?>
                                         <a href="<?php the_permalink(); ?>" class="is-flex-shrink-0"
                                             aria-label="<?php the_title_attribute(); ?>">
-                                            <?php the_post_thumbnail('blog-thumb', array(
-                                                'class' => 'is-rounded',
-                                                'style' => 'width: 80px; height: 80px; object-fit: cover;',
-                                                'alt' => get_the_title()
-                                            )); ?>
+                                            <figure class="image is-64x64">
+                                                <?php the_post_thumbnail('blog-thumb', array(
+                                                    'class' => 'is-rounded',
+                                                    'style' => 'width: 64px; height: 64px; object-fit: cover;',
+                                                    'alt' => get_the_title()
+                                                )); ?>
+                                            </figure>
                                         </a>
                                     <?php endif; ?>
 
-                                    <div class="is-flex-grow-1 is-flex is-flex-direction-column" style="min-width: 0;">
-                                        <h3 class="title is-6 has-text-weight-bold mb-2">
+                                    <div class="is-flex-grow-1 is-flex is-flex-direction-column" style="min-width: 0; gap: 0.5rem;">
+                                        <h3 class="title is-6 has-text-weight-bold m-0">
                                             <a href="<?php the_permalink(); ?>" style="text-decoration: none; color: inherit;">
                                                 <?php the_title(); ?>
                                             </a>
                                         </h3>
 
-                                        <p class="content is-size-7 mb-2">
+                                        <p class="content is-size-7 m-0">
                                             <?php echo theme_get_limited_excerpt(get_the_ID(), 12); ?>
                                         </p>
 
-                                        <div class="mt-auto">
+                                        <div>
                                             <?php get_template_part('template-parts/post-meta'); ?>
                                         </div>
                                     </div>

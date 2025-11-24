@@ -1,29 +1,45 @@
 export class SearchForm {
-  private form: HTMLFormElement | null;
-  private submitBtn: HTMLButtonElement | null;
+  private forms: NodeListOf<HTMLFormElement>;
 
   constructor() {
-    this.form = document.getElementById('search-form') as HTMLFormElement;
-    this.submitBtn = document.getElementById('search-submit-btn') as HTMLButtonElement;
+    // Suporta tanto o form do modal (ID) quanto forms com data-attribute
+    const modalForm = document.getElementById('search-form') as HTMLFormElement;
+    const dataForms = document.querySelectorAll<HTMLFormElement>('[data-search-form]');
 
-    if (this.form && this.submitBtn) {
-      this.setupEventListeners();
-    }
+    // Combinar ambos em um array
+    const allForms: HTMLFormElement[] = [];
+    if (modalForm) allForms.push(modalForm);
+    dataForms.forEach(form => allForms.push(form));
+
+    // Converter para NodeList simulado
+    this.forms = allForms as any;
+
+    this.init();
   }
 
-  private setupEventListeners(): void {
-    if (!this.form) return;
+  private init(): void {
+    if (this.forms.length === 0) return;
 
-    this.form.addEventListener('submit', this.handleSubmit.bind(this));
+    this.forms.forEach((form) => {
+      this.setupForm(form);
+    });
   }
 
-  private handleSubmit(_e: Event): void {
+  private setupForm(form: HTMLFormElement): void {
+    const submitBtn = form.querySelector<HTMLButtonElement>('[data-search-submit]') ||
+                     form.querySelector<HTMLButtonElement>('#search-submit-btn');
+
+    if (!submitBtn) return;
+
+    form.addEventListener('submit', () => {
+      this.handleSubmit(submitBtn);
+    });
+  }
+
+  private handleSubmit(submitBtn: HTMLButtonElement): void {
     // Não prevenir o submit - deixar o form redirecionar normalmente
     // Apenas adicionar loading indicator no botão
-
-    if (this.submitBtn) {
-      this.submitBtn.disabled = true;
-      this.submitBtn.classList.add('is-loading');
-    }
+    submitBtn.disabled = true;
+    submitBtn.classList.add('is-loading');
   }
 }

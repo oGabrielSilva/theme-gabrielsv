@@ -30,7 +30,7 @@
                     $author_website = get_the_author_meta('user_url');
                     if ($author_website):
                         ?>
-                        <a href="<?php echo esc_url($author_website); ?>" class="button is-primary" target="_blank"
+                        <a href="<?php echo esc_url($author_website); ?>" class="button has-text-warning" target="_blank"
                             rel="noopener noreferrer" aria-label="Website de <?php the_author(); ?>">
                             <span class="icon">
                                 <?php get_template_part('template-parts/icons/globe'); ?>
@@ -42,7 +42,7 @@
                     $author_twitter = get_the_author_meta('twitter');
                     if ($author_twitter):
                         ?>
-                        <a href="<?php echo esc_url($author_twitter); ?>" class="button is-primary" target="_blank"
+                        <a href="<?php echo esc_url($author_twitter); ?>" class="button has-text-warning" target="_blank"
                             rel="noopener noreferrer" aria-label="Twitter de <?php the_author(); ?>">
                             <span class="icon">
                                 <?php get_template_part('template-parts/icons/twitter'); ?>
@@ -54,7 +54,7 @@
                     $author_linkedin = get_the_author_meta('linkedin');
                     if ($author_linkedin):
                         ?>
-                        <a href="<?php echo esc_url($author_linkedin); ?>" class="button is-primary" target="_blank"
+                        <a href="<?php echo esc_url($author_linkedin); ?>" class="button has-text-warning" target="_blank"
                             rel="noopener noreferrer" aria-label="LinkedIn de <?php the_author(); ?>">
                             <span class="icon">
                                 <?php get_template_part('template-parts/icons/linkedin'); ?>
@@ -66,7 +66,7 @@
                     $author_github = get_the_author_meta('github');
                     if ($author_github):
                         ?>
-                        <a href="<?php echo esc_url($author_github); ?>" class="button is-primary" target="_blank"
+                        <a href="<?php echo esc_url($author_github); ?>" class="button has-text-warning" target="_blank"
                             rel="noopener noreferrer" aria-label="GitHub de <?php the_author(); ?>">
                             <span class="icon">
                                 <?php get_template_part('template-parts/icons/github'); ?>
@@ -95,7 +95,7 @@
         <div class="has-text-centered py-6">
             <h2 class="title is-4 has-text-weight-bold mb-3">Nenhum post publicado ainda</h2>
             <p class="">Este autor ainda não publicou nenhum conteúdo.</p>
-            <a href="<?php echo home_url('/'); ?>" class="button is-primary mt-3">Voltar ao Início</a>
+            <a href="<?php echo home_url('/'); ?>" class="button has-text-warning mt-3">Voltar ao Início</a>
         </div>
     <?php endif; ?>
 </main>
