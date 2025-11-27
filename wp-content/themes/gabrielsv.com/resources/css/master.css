@@ -32,10 +32,10 @@ pre,
   font-optical-sizing: auto;
 }
 
-svg {
+/* svg {
   width: 1rem !important;
   height: 1rem !important;
-}
+} */
 
 /* Exceção para ícones em botões específicos */
 /* #scrollToTop svg {
@@ -535,4 +535,9 @@ html[data-theme="dark"] .has-background-light {
     left: auto;
     right: 0;
   }
+}
+
+footer .linkb svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
 }

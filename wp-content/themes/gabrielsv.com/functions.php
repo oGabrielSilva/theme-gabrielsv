@@ -1,8 +1,4 @@
 <?php
-// ============================================
-// THEME SETUP
-// ============================================
-
 function theme_setup()
 {
     add_theme_support('title-tag');
@@ -14,8 +10,14 @@ function theme_setup()
         'gallery',
         'caption',
     ));
+
+    register_nav_menus(array(
+        'social-links' => __('Links de Redes Sociais', 'gabrielsv'),
+    ));
 }
 add_action('after_setup_theme', 'theme_setup');
+
+require_once get_template_directory() . '/inc/social-networks-config.php';
 
 /**
  * Carrega o conteúdo de um template de e-mail em HTML para uma string.
@@ -30,7 +32,6 @@ function get_email_template_html($template_name, $args = array())
     $template_path = get_theme_file_path("/template-parts/emails/{$template_name}.php");
 
     if (file_exists($template_path)) {
-        // Passa $args diretamente para o template sem usar extract()
         include $template_path;
     }
 
@@ -52,7 +53,6 @@ function theme_hide_admin_bar()
 {
     if (is_user_logged_in()) {
         $user = wp_get_current_user();
-        // Apenas Author, Editor, Administrator podem ver a admin bar
         if (
             !in_array('author', $user->roles) &&
             !in_array('editor', $user->roles) &&
@@ -64,32 +64,14 @@ function theme_hide_admin_bar()
 }
 add_action('after_setup_theme', 'theme_hide_admin_bar');
 
-// ❌ DESABILITADO: Bloquear wp-login.php (admin precisa fazer login)
-/*
-function theme_block_wp_login()
-{
-    global $pagenow;
-    if ($pagenow === 'wp-login.php' && !isset($_GET['action'])) {
-        status_header(404);
-        nocache_headers();
-        include(get_query_template('404'));
-        die();
-    }
-}
-add_action('init', 'theme_block_wp_login', 1);
-*/
-
-// Bloquear wp-admin para Subscribers (exceto AJAX)
 function theme_block_admin_for_subscribers()
 {
-    // Não bloquear se for requisição AJAX
     if (defined('DOING_AJAX') && DOING_AJAX) {
         return;
     }
 
     if (is_user_logged_in()) {
         $user = wp_get_current_user();
-        // Se não for Author, Editor ou Admin, bloquear wp-admin
         if (
             !in_array('author', $user->roles) &&
             !in_array('editor', $user->roles) &&
@@ -102,7 +84,6 @@ function theme_block_admin_for_subscribers()
 }
 add_action('admin_init', 'theme_block_admin_for_subscribers');
 
-// Helper: verificar se usuário pode acessar wp-admin
 function theme_user_can_access_admin($user_id)
 {
     $user = get_userdata($user_id);
@@ -114,19 +95,16 @@ function theme_user_can_access_admin($user_id)
         in_array('administrator', $user->roles);
 }
 
-// Helper: verificar se usuário tem página de autor
 function theme_user_has_author_page($user_id)
 {
     return theme_user_can_access_admin($user_id);
 }
 
-// Redirecionar /author para Subscribers
 function theme_redirect_author_for_subscribers()
 {
     if (is_author()) {
         $author = get_queried_object();
         if ($author && !theme_user_has_author_page($author->ID)) {
-            // Retornar 404 para autores sem permissão
             global $wp_query;
             $wp_query->set_404();
             status_header(404);
@@ -137,486 +115,17 @@ function theme_redirect_author_for_subscribers()
 }
 add_action('template_redirect', 'theme_redirect_author_for_subscribers');
 
-// ============================================
-// HELPER: OBTER IP DO CLIENTE
-// ============================================
-
-/**
- * ✅ Obtém o IP real do cliente (versão segura com suporte a Cloudflare)
- *
- * CORREÇÃO: Quando atrás do Cloudflare, REMOTE_ADDR retorna o IP do proxy.
- * Nesse caso, confiamos no HTTP_CF_CONNECTING_IP, que é um header específico
- * do Cloudflare que não pode ser falsificado pelo cliente (apenas pelo proxy).
- *
- * @return string IP do cliente
- */
 function theme_get_client_ip()
 {
-    // ✅ Se estiver atrás do Cloudflare, usar header específico
-    // HTTP_CF_CONNECTING_IP é injetado pelo Cloudflare e confiável
     if (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
         return $_SERVER['HTTP_CF_CONNECTING_IP'];
     }
 
-    // Fallback para REMOTE_ADDR (conexão direta ou sem Cloudflare)
     return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 }
 
-// ============================================
-// AJAX ENDPOINTS - AUTENTICAÇÃO
-// ============================================
-
-// ❌ DESABILITADO: Endpoint para login customizado
-/*
-function theme_ajax_custom_login()
-{
-    // Verificar nonce (CSRF protection)
-    check_ajax_referer('auth_nonce', 'nonce');
-
-    // Verificar dados recebidos
-    if (empty($_POST['username']) || empty($_POST['password'])) {
-        wp_send_json_error(array(
-            'message' => 'Por favor, preencha todos os campos.',
-        ));
-    }
-
-    $username = sanitize_text_field($_POST['username']);
-    $password = $_POST['password'];
-    $remember = !empty($_POST['remember']);
-
-    // Tentar fazer login
-    $credentials = array(
-        'user_login' => $username,
-        'user_password' => $password,
-        'remember' => $remember,
-    );
-
-    $user = wp_signon($credentials, false);
-
-    if (is_wp_error($user)) {
-        wp_send_json_error(array(
-            'message' => 'Usuário ou senha incorretos.',
-        ));
-    }
-
-    // Login bem-sucedido
-    $redirect_to = !empty($_POST['redirect_to']) ? esc_url_raw($_POST['redirect_to']) : home_url();
-
-    wp_send_json_success(array(
-        'redirect' => $redirect_to,
-        'message' => 'Login realizado com sucesso!',
-    ));
-}
-add_action('wp_ajax_nopriv_custom_login', 'theme_ajax_custom_login');
-*/
-
-// ❌ DESABILITADO: Endpoint para registro de usuários
-/*
-function theme_ajax_custom_register()
-{
-    // Verificar nonce (CSRF protection)
-    check_ajax_referer('auth_nonce', 'nonce');
-
-    // Verificar dados recebidos
-    if (empty($_POST['username']) || empty($_POST['email']) || empty($_POST['password'])) {
-        wp_send_json_error(array(
-            'message' => 'Por favor, preencha todos os campos.',
-        ));
-    }
-
-    $username = sanitize_user($_POST['username']);
-    $email = sanitize_email($_POST['email']);
-    $password = $_POST['password'];
-
-    // Validar username
-    if (!validate_username($username)) {
-        wp_send_json_error(array(
-            'message' => 'Nome de usuário inválido.',
-        ));
-    }
-
-    // Validar e-mail
-    if (!is_email($email)) {
-        wp_send_json_error(array(
-            'message' => 'E-mail inválido.',
-        ));
-    }
-
-    // Verificar se username já existe
-    if (username_exists($username)) {
-        wp_send_json_error(array(
-            'message' => 'Este nome de usuário já está em uso.',
-        ));
-    }
-
-    // Verificar se email já existe (mensagem genérica para prevenir user enumeration)
-    if (email_exists($email)) {
-        wp_send_json_error(array(
-            'message' => 'Não foi possível criar sua conta. Tente outro e-mail ou faça login.',
-        ));
-    }
-
-    // Criar usuário
-    $user_id = wp_create_user($username, $password, $email);
-
-    if (is_wp_error($user_id)) {
-        wp_send_json_error(array(
-            'message' => 'Erro ao criar usuário: ' . $user_id->get_error_message(),
-        ));
-    }
-
-    // Definir role como subscriber
-    $user = new WP_User($user_id);
-    $user->set_role('subscriber');
-
-    // Fazer login automático
-    wp_set_current_user($user_id);
-    wp_set_auth_cookie($user_id);
-
-    // Sucesso
-    wp_send_json_success(array(
-        'redirect' => home_url(),
-        'message' => 'Conta criada com sucesso!',
-    ));
-}
-add_action('wp_ajax_nopriv_custom_register', 'theme_ajax_custom_register');
-*/
-
-// ❌ DESABILITADO: Endpoint para atualizar perfil
-/*
-function theme_ajax_update_profile()
-{
-    // Verificar nonce (CSRF protection)
-    check_ajax_referer('profile_nonce', 'nonce');
-
-    // Verificar se está logado
-    if (!is_user_logged_in()) {
-        wp_send_json_error(array(
-            'message' => 'Você precisa estar logado para atualizar o perfil.',
-        ));
-    }
-
-    $user_id = get_current_user_id();
-
-    // Validar e-mail
-    if (empty($_POST['email']) || !is_email($_POST['email'])) {
-        wp_send_json_error(array(
-            'message' => 'Por favor, informe um e-mail válido.',
-        ));
-    }
-
-    // Preparar dados para atualização
-    $user_data = array(
-        'ID' => $user_id,
-        'user_email' => sanitize_email($_POST['email']),
-        'first_name' => sanitize_text_field($_POST['first_name']),
-        'last_name' => sanitize_text_field($_POST['last_name']),
-        'description' => sanitize_textarea_field($_POST['bio']),
-        'user_url' => esc_url_raw($_POST['url']),
-    );
-
-    // Se houver senha, adicionar
-    if (!empty($_POST['password'])) {
-        $user_data['user_pass'] = $_POST['password'];
-    }
-
-    // Atualizar usuário
-    $result = wp_update_user($user_data);
-
-    if (is_wp_error($result)) {
-        wp_send_json_error(array(
-            'message' => 'Erro ao atualizar perfil: ' . $result->get_error_message(),
-        ));
-    }
-
-    // Atualizar meta fields (redes sociais)
-    update_user_meta($user_id, 'twitter', sanitize_text_field($_POST['twitter']));
-    update_user_meta($user_id, 'linkedin', esc_url_raw($_POST['linkedin']));
-    update_user_meta($user_id, 'github', esc_url_raw($_POST['github']));
-
-    wp_send_json_success(array(
-        'message' => 'Perfil atualizado com sucesso!',
-    ));
-}
-add_action('wp_ajax_update_profile', 'theme_ajax_update_profile');
-*/
-
-// ============================================
-// AJAX: RECUPERAÇÃO DE SENHA
-// ============================================
-
-// ❌ DESABILITADO: Endpoint para solicitar reset de senha
-/*
-function theme_ajax_password_reset_request()
-{
-    // Verificar nonce
-    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'auth_nonce')) {
-        wp_send_json_error(array(
-            'message' => 'Nonce inválido. Recarregue a página e tente novamente.',
-        ));
-    }
-
-    // Rate limiting: máximo 3 tentativas por IP a cada 15 minutos
-    $ip_address = theme_get_client_ip();
-    $transient_key = 'password_reset_' . md5($ip_address);
-    $attempts = get_transient($transient_key);
-
-    if ($attempts && $attempts >= 3) {
-        wp_send_json_error(array(
-            'message' => 'Muitas tentativas de recuperação de senha. Aguarde 15 minutos e tente novamente.',
-        ));
-    }
-
-    // Validar email
-    $email = sanitize_email($_POST['email']);
-    if (!is_email($email)) {
-        wp_send_json_error(array(
-            'message' => 'E-mail inválido.',
-        ));
-    }
-
-    // Incrementar contador de tentativas (antes de verificar usuário)
-    $new_attempts = $attempts ? $attempts + 1 : 1;
-    set_transient($transient_key, $new_attempts, 15 * MINUTE_IN_SECONDS);
-
-    // Verificar se usuário existe
-    $user = get_user_by('email', $email);
-
-    // SEMPRE retornar sucesso (previne user enumeration)
-    // Mas só envia email se usuário existir
-    if ($user) {
-        // Gerar token de reset
-        $reset_key = get_password_reset_key($user);
-
-        if (!is_wp_error($reset_key)) {
-            // Criar link de reset
-            $reset_url = add_query_arg(
-                array(
-                    'action' => 'rp',
-                    'key' => $reset_key,
-                    'login' => rawurlencode($user->user_login),
-                ),
-                home_url('/auth')
-            );
-
-            // Enviar email
-            $to = $user->user_email;
-            $subject = '[' . get_bloginfo('name') . '] Recuperação de senha';
-            $message = get_email_template_html('email-password-reset', [
-                'user_name' => $user->display_name,
-                'reset_url' => $reset_url,
-            ]);
-
-            $headers = array('Content-Type: text/html; charset=UTF-8');
-            wp_mail($to, $subject, $message, $headers);
-        }
-    }
-
-    // Sempre retornar sucesso (mesmo se usuário não existir)
-    wp_send_json_success(array(
-        'message' => 'Se o e-mail estiver cadastrado, você receberá um link de recuperação.',
-    ));
-}
-add_action('wp_ajax_nopriv_password_reset_request', 'theme_ajax_password_reset_request');
-*/
-
-// ❌ DESABILITADO: Endpoint para confirmar reset de senha
-/*
-function theme_ajax_password_reset_confirm()
-{
-    // Verificar nonce (CSRF protection)
-    check_ajax_referer('auth_nonce', 'nonce');
-
-    // Validar dados
-    $reset_key = sanitize_text_field($_POST['reset_key']);
-    $reset_login = sanitize_text_field($_POST['reset_login']);
-    $password = $_POST['password'];
-
-    if (empty($reset_key) || empty($reset_login) || empty($password)) {
-        wp_send_json_error(array(
-            'message' => 'Dados inválidos.',
-        ));
-    }
-
-    // Verificar chave de reset
-    $user = check_password_reset_key($reset_key, $reset_login);
-
-    if (is_wp_error($user)) {
-        if ($user->get_error_code() === 'expired_key') {
-            wp_send_json_error(array(
-                'message' => 'Este link expirou. Solicite um novo link de recuperação.',
-            ));
-        } else {
-            wp_send_json_error(array(
-                'message' => 'Link de recuperação inválido.',
-            ));
-        }
-    }
-
-    // SEGURANÇA: Se usuário está logado, verificar se o token pertence a ele
-    if (is_user_logged_in()) {
-        $current_user_id = get_current_user_id();
-        if ($current_user_id != $user->ID) {
-            wp_send_json_error(array(
-                'message' => 'Este link de recuperação pertence a outro usuário. Faça logout primeiro.',
-            ));
-        }
-    }
-
-    // Redefinir senha (já invalida o token automaticamente)
-    reset_password($user, $password);
-
-    // Garantir invalidação do token (segurança extra)
-    global $wpdb;
-    $wpdb->update(
-        $wpdb->users,
-        array('user_activation_key' => ''),
-        array('ID' => $user->ID)
-    );
-
-    wp_send_json_success(array(
-        'message' => 'Senha redefinida com sucesso! Redirecionando...',
-    ));
-}
-add_action('wp_ajax_nopriv_password_reset_confirm', 'theme_ajax_password_reset_confirm');
-add_action('wp_ajax_password_reset_confirm', 'theme_ajax_password_reset_confirm');
-*/
-
-// ============================================
-// AJAX: DELETAR COMENTÁRIO
-// ============================================
-
-// ❌ DESABILITADO: Endpoint para deletar comentário
-/*
-function theme_ajax_delete_comment()
-{
-    // Verificar nonce (CSRF protection)
-    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'comment_nonce')) {
-        wp_send_json_error(array(
-            'message' => 'Nonce inválido. Recarregue a página e tente novamente.',
-        ));
-    }
-
-    // Verificar se está logado
-    if (!is_user_logged_in()) {
-        wp_send_json_error(array(
-            'message' => 'Você precisa estar logado para deletar comentários.',
-        ));
-    }
-
-    // Validar comment_id
-    if (empty($_POST['comment_id'])) {
-        wp_send_json_error(array(
-            'message' => 'ID do comentário não fornecido.',
-        ));
-    }
-
-    $comment_id = intval($_POST['comment_id']);
-    $comment = get_comment($comment_id);
-
-    // Verificar se comentário existe
-    if (!$comment) {
-        wp_send_json_error(array(
-            'message' => 'Comentário não encontrado.',
-        ));
-    }
-
-    // Verificar se o usuário é o autor do comentário
-    $current_user_id = get_current_user_id();
-    if ($comment->user_id !== $current_user_id) {
-        wp_send_json_error(array(
-            'message' => 'Você não pode deletar este comentário.',
-        ));
-    }
-
-    // Deletar comentário permanentemente
-    $result = wp_delete_comment($comment_id, true);
-
-    if ($result) {
-        wp_send_json_success(array(
-            'message' => 'Comentário deletado com sucesso.',
-        ));
-    } else {
-        wp_send_json_error(array(
-            'message' => 'Erro ao deletar comentário. Tente novamente.',
-        ));
-    }
-}
-add_action('wp_ajax_delete_user_comment', 'theme_ajax_delete_comment');
-*/
-
-/**
- * ❌ DESABILITADO: AJAX: Submeter comentário
- */
-/*
-function theme_ajax_submit_comment()
-{
-    // Verificar nonce
-    check_ajax_referer('comment_nonce', 'nonce');
-
-    // Verificar se usuário está logado
-    if (!is_user_logged_in()) {
-        wp_send_json_error(array('message' => 'Você precisa estar logado para comentar.'), 401);
-    }
-
-    // Validar campos obrigatórios
-    $comment_post_ID = isset($_POST['comment_post_ID']) ? intval($_POST['comment_post_ID']) : 0;
-    $comment_content = isset($_POST['comment']) ? trim($_POST['comment']) : '';
-    $comment_parent = isset($_POST['comment_parent']) ? intval($_POST['comment_parent']) : 0;
-
-    if (empty($comment_content)) {
-        wp_send_json_error(array('message' => 'O comentário não pode estar vazio.'), 400);
-    }
-
-    if (!$comment_post_ID || !get_post($comment_post_ID)) {
-        wp_send_json_error(array('message' => 'Post inválido.'), 400);
-    }
-
-    // Verificar se comentários estão abertos
-    if (!comments_open($comment_post_ID)) {
-        wp_send_json_error(array('message' => 'Os comentários estão fechados para este post.'), 403);
-    }
-
-    // Se for resposta, verificar se comentário pai existe
-    if ($comment_parent > 0) {
-        $parent_comment = get_comment($comment_parent);
-        if (!$parent_comment || $parent_comment->comment_post_ID != $comment_post_ID) {
-            wp_send_json_error(array('message' => 'Comentário pai inválido.'), 400);
-        }
-    }
-
-    // Preparar dados do comentário
-    $current_user = wp_get_current_user();
-    $commentdata = array(
-        'comment_post_ID' => $comment_post_ID,
-        'comment_content' => $comment_content,
-        'comment_parent' => $comment_parent,
-        'user_id' => $current_user->ID,
-        'comment_author' => $current_user->display_name,
-        'comment_author_email' => $current_user->user_email,
-        'comment_approved' => 1, // Auto-aprovar comentários de usuários logados
-    );
-
-    // Inserir comentário
-    $comment_id = wp_new_comment($commentdata, true);
-
-    if (is_wp_error($comment_id)) {
-        wp_send_json_error(array('message' => 'Erro ao criar comentário: ' . $comment_id->get_error_message()), 500);
-    }
-
-    // Retornar sucesso
-    wp_send_json_success(array(
-        'message' => 'Comentário publicado com sucesso!',
-        'comment_id' => $comment_id,
-        'reload' => true
-    ));
-}
-add_action('wp_ajax_submit_comment', 'theme_ajax_submit_comment');
-*/
-
 function theme_styles()
 {
-    // CSS compilado pelo Webpack (já incluirá Bulma)
     wp_enqueue_style('master', get_template_directory_uri() . '/resources/dist/css/master.min.css', array(), '1.0.0');
 
     wp_enqueue_style('style', get_stylesheet_uri(), array(), '1.0.0');
@@ -630,44 +139,6 @@ function theme_scripts()
         'in_footer' => false,
     ]);
 
-    // ❌ DESABILITADO: Script de comentários
-    /*
-    if (is_singular() && comments_open()) {
-        wp_enqueue_script('comments', get_template_directory_uri() . '/resources/dist/javascript/comments.min.js', array(), '1.0.0', [
-            'in_footer' => true,
-        ]);
-        wp_localize_script('comments', 'commentsData', array(
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('comment_nonce'),
-        ));
-    }
-    */
-
-    // ❌ DESABILITADO: Script de autenticação
-    /*
-    if (is_page_template('page-auth.php')) {
-        wp_enqueue_script('auth', get_template_directory_uri() . '/resources/dist/javascript/auth.min.js', array(), '1.0.0', [
-            'in_footer' => true,
-        ]);
-        wp_localize_script('auth', 'authData', array(
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('auth_nonce'),
-        ));
-    }
-    */
-
-    // ❌ DESABILITADO: Script de perfil
-    /*
-    if (is_page_template('page-eu.php')) {
-        wp_enqueue_script('profile', get_template_directory_uri() . '/resources/dist/javascript/profile.min.js', array(), '1.0.0', [
-            'in_footer' => true,
-        ]);
-        wp_localize_script('profile', 'profileData', array(
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('profile_nonce'),
-        ));
-    }
-    */
 }
 add_action('wp_enqueue_scripts', 'theme_scripts');
 
@@ -680,7 +151,6 @@ function theme_add_defer_attribute($tag, $handle, $src)
 }
 add_filter('script_loader_tag', 'theme_add_defer_attribute', 10, 3);
 
-// Adicionar favicons ao head
 function theme_add_favicons()
 {
     $favicon_path = get_template_directory_uri() . '/resources/favicon/';
@@ -693,10 +163,8 @@ function theme_add_favicons()
 }
 add_action('wp_head', 'theme_add_favicons');
 
-// Adicionar loading="lazy" em todas as imagens (exceto se fetchpriority="high")
 function theme_add_lazy_loading($attr, $attachment, $size)
 {
-    // Não adicionar lazy loading se já tem fetchpriority="high"
     if (isset($attr['fetchpriority']) && $attr['fetchpriority'] === 'high') {
         return $attr;
     }
@@ -706,7 +174,6 @@ function theme_add_lazy_loading($attr, $attachment, $size)
 }
 add_filter('wp_get_attachment_image_attributes', 'theme_add_lazy_loading', 10, 3);
 
-// Adicionar loading="lazy" em avatares
 function theme_lazy_load_avatars($args)
 {
     $args['loading'] = 'lazy';
@@ -717,22 +184,17 @@ add_filter('get_avatar_data', function ($args, $id_or_email) {
     return $args;
 }, 10, 2);
 
-// Limpar cache de queries quando posts forem publicados/atualizados
 function theme_clear_post_caches($post_id)
 {
-    // Limpar cache de posts relacionados
     delete_transient('related_posts_' . $post_id);
 
-    // Limpar cache de últimos posts para todos os posts
     global $wpdb;
     $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_latest_posts_%'");
     $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_latest_posts_%'");
 
-    // Limpar cache de posts do autor
     $author_id = get_post_field('post_author', $post_id);
 
-    // ✅ CORREÇÃO: Sanitizar author_id e usar esc_like()
-    $author_id = intval($author_id); // Garantir que é inteiro
+    $author_id = intval($author_id);
 
     $pattern_posts = $wpdb->esc_like('_transient_author_posts_') . '%_' . $author_id;
     $wpdb->query($wpdb->prepare(
@@ -749,7 +211,6 @@ function theme_clear_post_caches($post_id)
 add_action('save_post', 'theme_clear_post_caches');
 add_action('delete_post', 'theme_clear_post_caches');
 
-// Helper para queries com cache
 function theme_get_cached_query($cache_key, $query_args, $cache_duration = 12 * HOUR_IN_SECONDS)
 {
     $cached_query = get_transient($cache_key);
@@ -770,41 +231,32 @@ function theme_add_google_fonts()
 }
 add_action('wp_head', 'theme_add_google_fonts');
 
-// Desativar API REST do WordPress (com exceções para plugins de segurança)
 function theme_disable_rest_api()
 {
-    // Remover link da API REST do head
     remove_action('wp_head', 'rest_output_link_wp_head');
     remove_action('wp_head', 'wp_oembed_add_discovery_links');
 
-    // Remover headers da API REST
     remove_action('template_redirect', 'rest_output_link_header', 11);
 
-    // Desativar API REST para usuários não logados (com whitelist)
     add_filter('rest_authentication_errors', function ($result) {
         if (!empty($result)) {
             return $result;
         }
 
-        // Permitir acesso se estiver logado
         if (is_user_logged_in()) {
             return $result;
         }
 
-        // Whitelist: Permitir endpoints específicos para plugins de segurança
         $current_route = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
 
-        // Wordfence precisa de alguns endpoints para comunicação
         if (strpos($current_route, 'wordfence') !== false) {
             return $result;
         }
 
-        // Cloudflare pode fazer health checks via oembed
         if (strpos($current_route, 'oembed') !== false) {
             return $result;
         }
 
-        // Bloquear todo o resto da API para não-logados
         return new WP_Error(
             'rest_not_logged_in',
             'API não disponível publicamente.',
@@ -814,7 +266,6 @@ function theme_disable_rest_api()
 }
 add_action('init', 'theme_disable_rest_api');
 
-// Adicionar tamanhos de imagem personalizados para o blog
 function theme_add_image_sizes()
 {
     add_image_size('blog-hero', 800, 400, true); // Para o post principal do hero
@@ -824,14 +275,12 @@ function theme_add_image_sizes()
 add_action('after_setup_theme', 'theme_add_image_sizes');
 
 
-// Helper para nome de categoria (converte "Uncategorized" para "Rabiscos")
 function theme_get_category_name($category)
 {
     $default_category_id = get_option('default_category');
     return ($category->term_id === $default_category_id) ? 'Rabiscos' : $category->name;
 }
 
-// Função helper para obter categorias formatadas
 function theme_get_formatted_categories($post_id = null)
 {
     if (!$post_id) {
@@ -854,7 +303,6 @@ function theme_get_formatted_categories($post_id = null)
     return $formatted_categories;
 }
 
-// Função helper para obter excerpt limitado
 function theme_get_limited_excerpt($post_id = null, $word_limit = 15)
 {
     if (!$post_id) {
@@ -871,7 +319,6 @@ function theme_get_limited_excerpt($post_id = null, $word_limit = 15)
     return wp_trim_words($excerpt, $word_limit);
 }
 
-// Adicionar campos de redes sociais ao perfil do usuário
 function theme_add_social_fields($user_fields)
 {
     $user_fields['twitter'] = 'Twitter/X';
@@ -882,7 +329,6 @@ function theme_add_social_fields($user_fields)
 }
 add_filter('user_contactmethods', 'theme_add_social_fields');
 
-// Customizar paginação para usar classes do Bulma
 function theme_bootstrap_pagination($args = array())
 {
     $defaults = array(
@@ -904,19 +350,14 @@ function theme_bootstrap_pagination($args = array())
     echo '<ul class="pagination-list">';
 
     foreach ($links as $link) {
-        // Detectar página ativa
         if (strpos($link, 'current') !== false) {
             $link = str_replace('page-numbers current', 'pagination-link is-current', $link);
             $link = str_replace('<span', '<a', $link);
             $link = str_replace('</span>', '</a>', $link);
             echo "<li>$link</li>";
-        }
-        // Detectar dots
-        elseif (strpos($link, 'dots') !== false) {
+        } elseif (strpos($link, 'dots') !== false) {
             echo '<li><span class="pagination-ellipsis">&hellip;</span></li>';
-        }
-        // Links normais
-        else {
+        } else {
             $link = str_replace('page-numbers', 'pagination-link', $link);
             echo "<li>$link</li>";
         }
@@ -926,135 +367,10 @@ function theme_bootstrap_pagination($args = array())
     echo '</nav>';
 }
 
-// ============================================
-// EMAIL NOTIFICATIONS - COMENTÁRIOS
-// ============================================
-
-// ❌ DESABILITADO: Notificar quando comentário for aprovado
-/*
-function theme_notify_comment_approved($new_status, $old_status, $comment)
-{
-    // Só notificar se mudou para "approved"
-    if ($new_status !== 'approved' || $old_status === 'approved') {
-        return;
-    }
-
-    // Verificar se comentário tem user_id (usuário logado)
-    if (!$comment || !$comment->user_id) {
-        return;
-    }
-
-    $user = get_userdata($comment->user_id);
-    if (!$user) {
-        return;
-    }
-
-    $post = get_post($comment->comment_post_ID);
-    if (!$post) {
-        return;
-    }
-
-    // Cooldown: evitar envio duplicado em 5 minutos
-    $transient_key = 'email_comment_approved_' . $user->ID;
-    if (get_transient($transient_key)) {
-        return;
-    }
-
-    // Preparar e-mail
-    $to = $user->user_email;
-    $subject = '[' . get_bloginfo('name') . '] Seu comentário foi aprovado';
-    $message = get_email_template_html('email-comment-approved', [
-        'user_name' => $user->display_name,
-        'post_title' => $post->post_title,
-        'comment_excerpt' => wp_trim_words(wp_strip_all_tags($comment->comment_content), 30),
-        'comment_link' => get_comment_link($comment->comment_ID),
-    ]);
-
-    $headers = array('Content-Type: text/html; charset=UTF-8');
-    wp_mail($to, $subject, $message, $headers);
-
-    // Bloquear novos envios pelos próximos 5 minutos
-    set_transient($transient_key, true, 5 * MINUTE_IN_SECONDS);
-}
-add_action('transition_comment_status', 'theme_notify_comment_approved', 10, 3);
-*/
-
-// ❌ DESABILITADO: Notificar quando comentário receber resposta
-/*
-function theme_notify_comment_reply($comment_id, $comment)
-{
-    // Verificar se é uma resposta (tem comment_parent)
-    if (!$comment->comment_parent) {
-        return;
-    }
-
-    // Pegar comentário pai
-    $parent_comment = get_comment($comment->comment_parent);
-    if (!$parent_comment || !$parent_comment->user_id) {
-        return;
-    }
-
-    // Não notificar se responder a si mesmo
-    if ($parent_comment->user_id === $comment->user_id) {
-        return;
-    }
-
-    $parent_user = get_userdata($parent_comment->user_id);
-    if (!$parent_user) {
-        return;
-    }
-
-    $post = get_post($comment->comment_post_ID);
-    if (!$post) {
-        return;
-    }
-
-    // Cooldown: evitar spam de notificações entre mesmos usuários
-    $transient_key = sprintf(
-        'email_reply_%d_from_%d',
-        $parent_comment->user_id,  // quem vai receber
-        $comment->user_id           // quem respondeu
-    );
-
-    if (get_transient($transient_key)) {
-        // E-mail de resposta já enviado recentemente entre esses usuários
-        return;
-    }
-
-    // Preparar e-mail
-    $to = $parent_user->user_email;
-    $subject = '[' . get_bloginfo('name') . '] Novo comentário respondendo ao seu';
-    $message = get_email_template_html('email-comment-reply', [
-        'parent_user_name' => $parent_user->display_name,
-        'replier_name' => get_comment_author($comment),
-        'post_title' => $post->post_title,
-        'parent_comment_excerpt' => wp_trim_words(wp_strip_all_tags($parent_comment->comment_content), 20),
-        'comment_excerpt' => wp_trim_words(wp_strip_all_tags($comment->comment_content), 30),
-        'comment_link' => get_comment_link($comment_id),
-    ]);
-
-    $headers = array('Content-Type: text/html; charset=UTF-8');
-    wp_mail($to, $subject, $message, $headers);
-
-    // Bloquear novas notificações entre esses usuários pelos próximos 5 minutos
-    set_transient($transient_key, true, 5 * MINUTE_IN_SECONDS);
-}
-add_action('comment_post', 'theme_notify_comment_reply', 10, 2);
-*/
-
-// ============================================
-// FORÇAR DESABILITAÇÃO DE REGISTRO E COMENTÁRIOS
-// ============================================
-
-/**
- * Forçar desabilitação de registro público
- */
 function theme_force_disable_registration()
 {
-    // Garantir que registro esteja desabilitado
     update_option('users_can_register', 0);
 
-    // Bloquear tentativas de registro via URL direta
     if (isset($_GET['action']) && $_GET['action'] === 'register') {
         wp_redirect(home_url());
         exit;
@@ -1062,16 +378,12 @@ function theme_force_disable_registration()
 }
 add_action('init', 'theme_force_disable_registration');
 
-/**
- * Desabilitar comentários completamente
- */
+
 function theme_disable_comments()
 {
-    // Fechar comentários em todos os posts
     add_filter('comments_open', '__return_false', 20, 2);
     add_filter('pings_open', '__return_false', 20, 2);
 
-    // Ocultar opção de comentários do admin
     add_filter('comments_array', '__return_empty_array', 10, 2);
 }
 add_action('admin_init', 'theme_disable_comments');

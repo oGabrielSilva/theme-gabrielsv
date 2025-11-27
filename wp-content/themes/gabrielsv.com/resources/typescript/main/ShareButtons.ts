@@ -11,7 +11,7 @@ export class ShareButtons {
 
   constructor() {
     this.wrappers = document.querySelectorAll("[data-share-wrapper]");
-    this.hasWebShare = !navigator.share;
+    this.hasWebShare = !!navigator.share;
     this.init();
   }
 
